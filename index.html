@@ -1,493 +1,421 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#1a1a2e">
-    <title>Sistema Automotriz Profesional</title><title>Sistema Automotriz Profesional</title>
-    
-    <!-- PWA MANIFEST -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProPart Millán - Scanner & Parts</title>
     <link rel="manifest" href="manifest.json">
-    
-    <!-- ICONOS APPLE -->
-    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/car.png">
-    
-    <!-- META TAGS PWA -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="AutoPro">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- FUNCIONES CRÍTICAS - Deben cargarse PRIMERO -->
-    <script>
-        // Función de navegación - disponible inmediatamente
-        function switchView(viewName) {
-            console.log('Cambiando a:', viewName);
-            
-            var views = ['dashboard', 'scanner', 'technical', 'inventory', 'keys', 'throttle'];
-            
-            // Ocultar todas
-            for (var i = 0; i < views.length; i++) {
-                var el = document.getElementById('view-' + views[i]);
-                if (el) el.style.display = 'none';
-                
-                var tab = document.getElementById('tab-' + views[i]);
-                if (tab) tab.classList.remove('active');
-            }
-            
-            // Mostrar seleccionada
-            var target = document.getElementById('view-' + viewName);
-            if (target) target.style.display = 'block';
-            
-            var activeTab = document.getElementById('tab-' + viewName);
-            if (activeTab) activeTab.classList.add('active');
-            
-            console.log('✓ Vista:', viewName);
-        }
-        
-        // Función de settings
-        function toggleSettings() {
-            var pass = prompt('Clave administrador:');
-            if (pass === '1234') {
-                alert('Modo Admin Activado');
-                location.reload();
-            } else if (pass !== null) {
-                alert('Clave incorrecta');
-            }
-        }
-    </script>
+    <meta name="theme-color" content="#121212">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
-        
         :root {
-            --primary: #2d4a6e;
-            --secondary: #4a7ba7;
-            --accent: #6b9bd1;
-            --bg-dark: #0f1419;
-            --bg-card: #1a1f2e;
-            --bg-elevated: #252d3d;
-            --text-primary: #e8eaed;
-            --text-secondary: #9aa5b1;
-            --text-muted: #6b7280;
-            --border: #2d3748;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #3b82f6;
+            --primary-color: #00d2ff; /* Azul Neón */
+            --accent-color: #ff3d00;  /* Naranja Alerta */
+            --bg-dark: #121212;
+            --panel-dark: #1e1e1e;
+            --text-main: #ffffff;
+            --success: #00ff88;
         }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: var(--bg-dark); 
-            color: var(--text-primary);
-            overflow-x: hidden;
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            user-select: none; /* Evita seleccionar texto al picar botones */
         }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-        
-        .pro-header {
-            background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
-            border-bottom: 1px solid var(--border);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        
-        .nav-item {
-            padding: 12px 20px;
-            border-radius: 8px;
-            transition: all 0.2s;
-            background: transparent;
-            border: 1px solid transparent;
-        }
-        .nav-item:hover { background: var(--bg-elevated); border-color: var(--border); }
-        .nav-item.active { background: var(--primary); border-color: var(--accent); }
-        
-        .pro-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.3s;
-        }
-        .pro-card:hover { border-color: var(--accent); box-shadow: 0 4px 20px rgba(107,155,209,0.1); }
-        
-        .scanner-console {
-            background: #000;
-            border: 2px solid var(--border);
-            border-radius: 8px;
+
+        /* --- ENCABEZADO TIPO TABLERO --- */
+        header {
+            background: linear-gradient(180deg, #000 0%, #1a1a1a 100%);
             padding: 15px;
-            height: 200px;
-            overflow-y: auto;
-            font-size: 11px;
-            line-height: 1.6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-color);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
         }
-        .scanner-console::-webkit-scrollbar { width: 6px; }
-        .scanner-console::-webkit-scrollbar-track { background: #1a1a1a; }
-        .scanner-console::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
-        
-        .data-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-        }
-        .data-cell {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border);
-            border-left: 3px solid var(--accent);
-            padding: 12px;
-            border-radius: 6px;
-        }
-        
-        input, select, textarea {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            padding: 12px;
-            border-radius: 8px;
-            width: 100%;
-            outline: none;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.2s;
-        }
-        input:focus, select:focus, textarea:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(107,155,209,0.1);
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 13px;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-            cursor: pointer;
-        }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--secondary); }
-        .btn-success { background: var(--success); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-outline { background: transparent; border-color: var(--border); color: var(--text-primary); }
-        .btn-outline:hover { background: var(--bg-elevated); }
-        .btn-sm { padding: 6px 12px; font-size: 11px; }
-        
-        .tab-btn {
-            padding: 10px 20px;
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-        }
-        .tab-btn.active {
-            color: var(--accent);
-            border-bottom-color: var(--accent);
-        }
-        
-        .hidden { display: none !important; }
-        .admin-view { display: none; }
-        .show-admin .admin-view { display: block; }
-        
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-        }
-        .status-online { background: var(--success); box-shadow: 0 0 8px var(--success); }
-        .status-offline { background: var(--text-muted); }
-        
-        .pro-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .pro-table th {
-            background: var(--bg-elevated);
-            padding: 12px;
-            text-align: left;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-secondary);
+
+        .brand {
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            border-bottom: 1px solid var(--border);
-        }
-        .pro-table td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border);
-            font-size: 13px;
-        }
-        .pro-table tr:hover {
-            background: var(--bg-elevated);
         }
         
-        .filter-chip {
-            display: inline-block;
-            padding: 6px 12px;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            font-size: 11px;
-            margin: 4px;
+        .brand span { color: var(--primary-color); }
+
+        .status-led {
+            width: 12px;
+            height: 12px;
+            background-color: #333;
+            border-radius: 50%;
+            border: 2px solid #555;
+            box-shadow: inset 0 0 5px #000;
+        }
+        
+        .status-led.on {
+            background-color: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            border-color: #fff;
+        }
+
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* --- BOTONES GRANDES (GRID) --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .tile {
+            background: var(--panel-dark);
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 25px 10px;
+            text-align: center;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .filter-chip:hover {
-            border-color: var(--accent);
-            background: var(--primary);
+
+        .tile:active { transform: scale(0.96); background: #252525; }
+        
+        .tile i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+            color: var(--primary-color);
         }
-        .filter-chip.active {
-            background: var(--primary);
-            border-color: var(--accent);
-            color: white;
+
+        .tile h3 { margin: 0; font-size: 0.9rem; text-transform: uppercase; }
+
+        /* Botón especial de conectar */
+        .tile.connect {
+            grid-column: span 2; /* Ocupa todo el ancho */
+            background: rgba(0, 210, 255, 0.1);
+            border-color: var(--primary-color);
         }
+
+        /* --- PANTALLAS (SECCIONES) --- */
+        .screen { display: none; animation: fadeIn 0.3s; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- BUSCADOR DE PIEZAS --- */
+        .form-group { margin-bottom: 15px; }
+        
+        select, input {
+            width: 100%;
+            padding: 15px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        select:focus { border-color: var(--primary-color); }
+
+        .part-card {
+            background: #1f1f1f;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .part-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--success);
+        }
+
+        /* --- CONSOLA DE COMANDOS (SCANNER) --- */
+        #console-output {
+            background: #000;
+            color: var(--success);
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            height: 150px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid #333;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        /* Botón Volver */
+        .btn-back {
+            background: transparent;
+            border: 1px solid #555;
+            color: #aaa;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="flex flex-col h-screen">
+<body>
 
-    <!-- HEADER -->
-    <div class="pro-header p-4 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center text-white font-bold shadow-lg">
-                <i class="fa-solid fa-car-burst"></i>
-            </div>
-            <div>
-                <h1 class="font-bold text-sm tracking-tight">SISTEMA AUTOMOTRIZ PRO</h1>
-                <p class="text-[10px] text-gray-400">Taller • <span id="owner-name" contenteditable="true" class="text-blue-400 cursor-pointer hover:underline">Fernando Millán</span></p>
+    <header>
+        <div class="brand">PROPART <span>MILLÁN</span></div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:0.7rem; color:#aaa;">OBD2</span>
+            <div id="connection-led" class="status-led"></div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div id="menu-screen" class="screen active">
+            <h2 style="font-weight:300; margin-bottom:20px;">Panel de Control</h2>
+            
+            <div class="dashboard-grid">
+                <div class="tile connect" onclick="conectarScanner()">
+                    <i class="fas fa-plug" id="icon-conn"></i>
+                    <h3 id="text-conn">Conectar Escáner</h3>
+                    <div style="font-size:0.7rem; color:#aaa; margin-top:5px;">Bluetooth ELM327</div>
+                </div>
+
+                <div class="tile" onclick="irA('parts-screen')">
+                    <i class="fas fa-cogs"></i>
+                    <h3>Refacciones</h3>
+                </div>
+
+                <div class="tile" onclick="irA('scanner-screen')">
+                    <i class="fas fa-heartbeat"></i>
+                    <h3>Diagnóstico</h3>
+                </div>
+
+                <div class="tile" onclick="alert('Función disponible en versión PRO')">
+                    <i class="fas fa-project-diagram"></i>
+                    <h3>Diagramas</h3>
+                </div>
+
+                <div class="tile" onclick="alert('Gestión de Taller próximamente')">
+                    <i class="fas fa-user-cog"></i>
+                    <h3>Mi Taller</h3>
+                </div>
             </div>
         </div>
-        <div class="flex items-center gap-4">
-            <div class="text-xs text-gray-400">
-                <span class="status-dot status-online"></span>
-                <span id="connection-status">Sistema Activo</span>
+
+        <div id="parts-screen" class="screen">
+            <button class="btn-back" onclick="irA('menu-screen')"><i class="fas fa-arrow-left"></i> Volver</button>
+            <h2>Buscador de Piezas</h2>
+
+            <div class="form-group">
+                <select id="makeSelect" onchange="populateModels()">
+                    <option value="">Selecciona Marca</option>
+                </select>
             </div>
-            <button onclick="toggleSettings()" class="text-gray-400 hover:text-white">
-                <i class="fa-solid fa-gear text-lg"></i>
-            </button>
+            <div class="form-group">
+                <select id="modelSelect" onchange="populateYears()" disabled>
+                    <option value="">Selecciona Modelo</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <select id="yearSelect" onchange="showParts()" disabled>
+                    <option value="">Selecciona Año/Motor</option>
+                </select>
+            </div>
+
+            <div id="parts-results"></div>
         </div>
+
+        <div id="scanner-screen" class="screen">
+            <button class="btn-back" onclick="irA('menu-screen')"><i class="fas fa-arrow-left"></i> Volver</button>
+            <h2>Datos en Vivo</h2>
+            
+            <div id="console-output">Esperando conexión...<br>>_</div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <button class="tile" style="padding:15px;" onclick="enviarComando('01 05')">Temp. Motor</button>
+                <button class="tile" style="padding:15px;" onclick="enviarComando('01 0C')">RPM</button>
+                <button class="tile" style="padding:15px;" onclick="enviarComando('01 0D')">Velocidad</button>
+                <button class="tile" style="padding:15px;" onclick="enviarComando('03')">Leer Códigos</button>
+                <button class="tile" style="padding:15px; border-color:red; color:red;" onclick="enviarComando('04')">Borrar Códigos</button>
+            </div>
+        </div>
+
     </div>
 
-    <!-- NAVIGATION -->
-    <div class="bg-[#1a1f2e] border-b border-gray-800 px-4 flex gap-2 overflow-x-auto" id="navigation-tabs">
-        <button onclick="switchView('dashboard')" class="tab-btn active" id="tab-dashboard">
-            <i class="fa-solid fa-gauge-high mr-2"></i>Dashboard
-        </button>
-        <button onclick="switchView('scanner')" class="tab-btn" id="tab-scanner">
-            <i class="fa-solid fa-microchip mr-2"></i>Scanner
-        </button>
-        <button onclick="switchView('technical')" class="tab-btn" id="tab-technical">
-            <i class="fa-solid fa-book-bookmark mr-2"></i>Datos Técnicos
-        </button>
-        <button onclick="switchView('inventory')" class="tab-btn" id="tab-inventory">
-            <i class="fa-solid fa-boxes-stacked mr-2"></i>Refacciones
-        </button>
-        <button onclick="switchView('keys')" class="tab-btn" id="tab-keys">
-            <i class="fa-solid fa-key mr-2"></i>Llaves
-        </button>
-        <button onclick="switchView('throttle')" class="tab-btn" id="tab-throttle">
-            <i class="fa-solid fa-gauge mr-2"></i>TBI
-        </button>
-    </div>
+    <script>
+        // --- NAVEGACIÓN ---
+        function irA(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
 
-    <!-- MAIN CONTENT -->
-    <div id="main-content" class="flex-1 overflow-y-auto p-4 bg-[#0f1419]">
+        // --- BASE DE DATOS DE REFACCIONES ---
+        const db = {
+            "Volkswagen": {
+                "Jetta A4 (Clásico)": {
+                    "2.0L (1999-2015)": [
+                        {name: "Bobina de Encendido", brand: "Beru", price: "$650", code: "06A-905-115"},
+                        {name: "Sensor MAF", brand: "Bosch", price: "$1,200", code: "06A-906-461"},
+                        {name: "Bomba de Agua", brand: "Gates", price: "$450", code: "CP-4545"}
+                    ],
+                    "1.8 Turbo": [
+                        {name: "Válvula N75", brand: "Pierburg", price: "$980", code: "058-906-283"},
+                        {name: "Bobina Roja R8", brand: "NGK", price: "$850 c/u", code: "U5014"}
+                    ]
+                },
+                "Vento": {
+                    "1.6L (Todos)": [
+                        {name: "Juego de Bujías", brand: "NGK", price: "$320", code: "ZFR6T"},
+                        {name: "Filtro de Aceite", brand: "Mann", price: "$150", code: "W712/94"}
+                    ]
+                }
+            },
+            "Nissan": {
+                "Tsuru III": {
+                    "1.6L 16V": [
+                        {name: "Distribuidor Completo", brand: "Hitachi", price: "$1,800", code: "D4T92-01"},
+                        {name: "Sensor TPS", brand: "Tomco", price: "$350", code: "TPS-343"}
+                    ]
+                },
+                "Versa": {
+                    "1.6L (2012-2019)": [
+                        {name: "Amortiguador Del.", brand: "KYB", price: "$1,450", code: "339234"},
+                        {name: "Horquilla Der.", brand: "Syd", price: "$850", code: "1515004"}
+                    ]
+                }
+            }
+        };
 
-        <!-- DASHBOARD -->
-        <div id="view-dashboard" style="display: block;">
-            <div class="pro-card">
-                <h2 class="font-bold text-lg mb-4">🚗 Bienvenido al Sistema Automotriz Profesional</h2>
-                <p class="text-gray-400 mb-6">Sistema completo con Scanner OBD2, Base de Datos Técnica 1990-2025 y Gestión de Inventario</p>
+        // Lógica de Refacciones
+        const makeSelect = document.getElementById('makeSelect');
+        const modelSelect = document.getElementById('modelSelect');
+        const yearSelect = document.getElementById('yearSelect');
+
+        // Llenar marcas al inicio
+        for(let make in db) makeSelect.add(new Option(make, make));
+
+        window.populateModels = function() {
+            modelSelect.innerHTML = '<option>Selecciona Modelo</option>';
+            modelSelect.disabled = false;
+            let make = makeSelect.value;
+            if(db[make]) {
+                for(let model in db[make]) modelSelect.add(new Option(model, model));
+            }
+        };
+
+        window.populateYears = function() {
+            yearSelect.innerHTML = '<option>Selecciona Año/Motor</option>';
+            yearSelect.disabled = false;
+            let make = makeSelect.value;
+            let model = modelSelect.value;
+            if(db[make] && db[make][model]) {
+                for(let year in db[make][model]) yearSelect.add(new Option(year, year));
+            }
+        };
+
+        window.showParts = function() {
+            let make = makeSelect.value;
+            let model = modelSelect.value;
+            let year = yearSelect.value;
+            let results = document.getElementById('parts-results');
+            results.innerHTML = '';
+
+            if(db[make][model][year]) {
+                db[make][model][year].forEach(part => {
+                    results.innerHTML += `
+                        <div class="part-card">
+                            <div>
+                                <div style="font-weight:bold; color:#fff;">${part.name}</div>
+                                <div style="font-size:0.8rem; color:#aaa;">${part.brand} | ${part.code}</div>
+                            </div>
+                            <div class="part-price">${part.price}</div>
+                        </div>
+                    `;
+                });
+            }
+        };
+
+        // --- BLUETOOTH ELM327 (OBD2) ---
+        let device, server, service, characteristic;
+
+        window.conectarScanner = async function() {
+            try {
+                logConsole("Buscando dispositivo OBDII...");
+                device = await navigator.bluetooth.requestDevice({
+                    filters: [{ namePrefix: 'OBD' }],
+                    optionalServices: ['0000fff0-0000-1000-8000-00805f9b34fb']
+                });
+
+                logConsole("Conectando a " + device.name + "...");
+                server = await device.gatt.connect();
+                service = await server.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
+                characteristic = await service.getCharacteristic('0000fff1-0000-1000-8000-00805f9b34fb');
+
+                // Éxito
+                document.getElementById('connection-led').classList.add('on');
+                document.getElementById('text-conn').innerText = "CONECTADO";
+                document.getElementById('text-conn').style.color = "#00ff88";
+                document.getElementById('icon-conn').className = "fas fa-link";
+                logConsole("¡CONEXIÓN EXITOSA! Protocolo listo.");
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-[#252d3d] p-4 rounded-lg border border-gray-700">
-                        <div class="text-3xl mb-2">📊</div>
-                        <h3 class="font-bold mb-1">150+ Modelos</h3>
-                        <p class="text-xs text-gray-400">Base de datos 1990-2025</p>
-                    </div>
-                    <div class="bg-[#252d3d] p-4 rounded-lg border border-gray-700">
-                        <div class="text-3xl mb-2">🔧</div>
-                        <h3 class="font-bold mb-1">Scanner Profesional</h3>
-                        <p class="text-xs text-gray-400">OBD2 bidireccional en tiempo real</p>
-                    </div>
-                    <div class="bg-[#252d3d] p-4 rounded-lg border border-gray-700">
-                        <div class="text-3xl mb-2">📦</div>
-                        <h3 class="font-bold mb-1">55+ Refacciones</h3>
-                        <p class="text-xs text-gray-400">Control de inventario inteligente</p>
-                    </div>
-                </div>
+                // Configuración inicial del ELM
+                await enviarComando("AT Z");     // Reset
+                await enviarComando("AT SP 0");  // Protocolo automático
+                
+                // Ir directo a la pantalla de escáner
+                setTimeout(() => irA('scanner-screen'), 1000);
 
-                <div class="mt-6 p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
-                    <h3 class="font-bold mb-2 text-blue-400">🎯 Acceso Rápido</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        <button onclick="switchView('scanner')" class="text-left p-3 bg-[#252d3d] rounded hover:bg-[#2d3748]">
-                            <div class="font-bold text-sm">Scanner OBD2</div>
-                            <div class="text-xs text-gray-400">Diagnóstico en vivo</div>
-                        </button>
-                        <button onclick="switchView('technical')" class="text-left p-3 bg-[#252d3d] rounded hover:bg-[#2d3748]">
-                            <div class="font-bold text-sm">Datos Técnicos</div>
-                            <div class="text-xs text-gray-400">Diagramas y pinout</div>
-                        </button>
-                        <button onclick="switchView('inventory')" class="text-left p-3 bg-[#252d3d] rounded hover:bg-[#2d3748]">
-                            <div class="font-bold text-sm">Inventario</div>
-                            <div class="text-xs text-gray-400">Gestión de stock</div>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+            } catch (e) {
+                logConsole("Error: " + e);
+                alert("No se pudo conectar: " + e);
+            }
+        };
 
-        <!-- SCANNER -->
-        <div id="view-scanner" style="display: none;">
-            <div class="pro-card">
-                <h2 class="font-bold text-lg mb-4">🔧 Scanner OBD2 Profesional</h2>
-                <p class="text-gray-400 mb-4">Conecta tu dispositivo Bluetooth OBD2 para diagnóstico en tiempo real</p>
-                <button class="btn btn-primary">
-                    <i class="fa-brands fa-bluetooth mr-2"></i>
-                    Conectar Dispositivo OBD2
-                </button>
-                <div class="scanner-console mt-4 font-mono">
-                    <div class="text-gray-500">[SYSTEM] Esperando conexión...</div>
-                </div>
-            </div>
-        </div>
+        window.enviarComando = async function(cmd) {
+            if (!characteristic) {
+                logConsole("⚠️ No hay conexión. Conecta el escáner primero.");
+                return;
+            }
+            try {
+                logConsole(">> Envia: " + cmd);
+                let encoder = new TextEncoder();
+                await characteristic.writeValue(encoder.encode(cmd + '\r'));
+                // Aquí deberíamos leer la respuesta (valuechanged event), 
+                // por simplicidad en este demo solo enviamos.
+            } catch (e) {
+                logConsole("Error al enviar: " + e);
+            }
+        };
 
-        <!-- TECHNICAL -->
-        <div id="view-technical" style="display: none;">
-            <div class="pro-card">
-                <h2 class="font-bold text-lg mb-4">📚 Base de Datos Técnica 1990-2025</h2>
-                <p class="text-gray-400 mb-4">150+ modelos con diagramas, pinout ECU y especificaciones</p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <select class="text-sm">
-                        <option>Seleccionar Marca</option>
-                        <option>NISSAN</option>
-                        <option>VOLKSWAGEN</option>
-                        <option>CHEVROLET</option>
-                        <option>FORD</option>
-                        <option>HONDA</option>
-                        <option>TOYOTA</option>
-                    </select>
-                    <select class="text-sm">
-                        <option>Seleccionar Modelo</option>
-                    </select>
-                    <select class="text-sm">
-                        <option>Seleccionar Motor</option>
-                    </select>
-                </div>
-            </div>
-        </div>
+        function logConsole(text) {
+            const consoleDiv = document.getElementById('console-output');
+            consoleDiv.innerHTML += `<div>${text}</div>`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
 
-        <!-- INVENTORY -->
-        <div id="view-inventory" style="display: none;">
-            <div class="pro-card">
-                <h2 class="font-bold text-lg mb-4">📦 Gestión de Refacciones</h2>
-                <p class="text-gray-400 mb-4">Control de inventario con 55+ productos</p>
-                <input type="text" placeholder="🔍 Buscar producto..." class="mb-4 text-sm">
-                <div class="text-center text-gray-500 py-8">
-                    Sistema de inventario disponible
-                </div>
-            </div>
-        </div>
-
-        <!-- KEYS -->
-        <div id="view-keys" style="display: none;">
-            <div class="pro-card">
-                <h2 class="font-bold text-lg mb-4">🔑 Programación de Llaves</h2>
-                <p class="text-gray-400 mb-4">Procedimientos para programar llaves e inmovilizadores</p>
-                <select class="mb-3 text-sm">
-                    <option>Seleccionar Marca</option>
-                    <option>NISSAN</option>
-                    <option>VOLKSWAGEN</option>
-                    <option>CHEVROLET</option>
-                </select>
-                <select class="text-sm">
-                    <option>Seleccionar Modelo</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- THROTTLE -->
-        <div id="view-throttle" style="display: none;">
-            <div class="pro-card">
-                <h2 class="font-bold text-lg mb-4">⚙️ Ajuste Cuerpo de Aceleración</h2>
-                <p class="text-gray-400 mb-4">Procedimientos de reseteo y reaprendizaje del TBI</p>
-                <select class="mb-3 text-sm">
-                    <option>Seleccionar Marca</option>
-                    <option>NISSAN</option>
-                    <option>VOLKSWAGEN</option>
-                    <option>CHEVROLET</option>
-                </select>
-                <select class="text-sm">
-                    <option>Seleccionar Modelo</option>
-                </select>
-            </div>
-        </div>
-
-    </div>
-
-    <script>
-        console.log('=== SISTEMA AUTOMOTRIZ PRO ===');
-        console.log('✓ Sistema inicializado correctamente');
-        console.log('📱 Versión: 1.0.0');
-        console.log('👨‍💻 Desarrollado por: Fernando Millán');
-    </script>
-</script>
-    
-    <!-- REGISTRO SERVICE WORKER -->
-    <script>
+        // --- REGISTRO PWA (Service Worker) ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('✓ Service Worker registrado'))
-                    .catch(err => console.log('✗ Error SW:', err));
+                    .then(reg => console.log('SW registrado', reg))
+                    .catch(err => console.log('SW falló', err));
             });
         }
-
-        // Prompt para instalar
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            // Mostrar banner personalizado
-            const installBanner = document.createElement('div');
-            installBanner.innerHTML = `
-                <div style="position: fixed; top: 70px; left: 0; right: 0; background: #2563eb; color: white; padding: 12px; text-align: center; z-index: 1000; font-size: 14px;">
-                    📱 ¡Instala esta app en tu dispositivo!
-                    <button onclick="instalarApp()" style="background: white; color: #2563eb; border: none; padding: 6px 12px; border-radius: 4px; margin-left: 10px; font-weight: bold; cursor: pointer;">
-                        INSTALAR
-                    </button>
-                    <button onclick="this.parentElement.remove()" style="background: transparent; color: white; border: 1px solid white; padding: 6px 12px; border-radius: 4px; margin-left: 6px; cursor: pointer;">
-                        Ahora no
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(installBanner);
-        });
-
-        function instalarApp() {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choice) => {
-                if (choice.outcome === 'accepted') {
-                    console.log('✓ App instalada');
-                }
-                deferredPrompt = null;
-            });
-        }
-
-        window.addEventListener('appinstalled', () => {
-            console.log('✓ PWA instalada correctamente');
-        });
     </script>
 </body>
-</html></body>
 </html>
