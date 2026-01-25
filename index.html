@@ -1,0 +1,429 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Sistema Automotriz Profesional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- FUNCIONES CRÍTICAS - Deben cargarse PRIMERO -->
+    <script>
+        // Función de navegación - disponible inmediatamente
+        function switchView(viewName) {
+            console.log('Cambiando a:', viewName);
+            
+            var views = ['dashboard', 'scanner', 'technical', 'inventory', 'keys', 'throttle'];
+            
+            // Ocultar todas
+            for (var i = 0; i < views.length; i++) {
+                var el = document.getElementById('view-' + views[i]);
+                if (el) el.style.display = 'none';
+                
+                var tab = document.getElementById('tab-' + views[i]);
+                if (tab) tab.classList.remove('active');
+            }
+            
+            // Mostrar seleccionada
+            var target = document.getElementById('view-' + viewName);
+            if (target) target.style.display = 'block';
+            
+            var activeTab = document.getElementById('tab-' + viewName);
+            if (activeTab) activeTab.classList.add('active');
+            
+            console.log('✓ Vista:', viewName);
+        }
+        
+        // Función de settings
+        function toggleSettings() {
+            var pass = prompt('Clave administrador:');
+            if (pass === '1234') {
+                alert('Modo Admin Activado');
+                location.reload();
+            } else if (pass !== null) {
+                alert('Clave incorrecta');
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+        
+        :root {
+            --primary: #2d4a6e;
+            --secondary: #4a7ba7;
+            --accent: #6b9bd1;
+            --bg-dark: #0f1419;
+            --bg-card: #1a1f2e;
+            --bg-elevated: #252d3d;
+            --text-primary: #e8eaed;
+            --text-secondary: #9aa5b1;
+            --text-muted: #6b7280;
+            --border: #2d3748;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-dark); 
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .pro-header {
+            background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .nav-item {
+            padding: 12px 20px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            background: transparent;
+            border: 1px solid transparent;
+        }
+        .nav-item:hover { background: var(--bg-elevated); border-color: var(--border); }
+        .nav-item.active { background: var(--primary); border-color: var(--accent); }
+        
+        .pro-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        .pro-card:hover { border-color: var(--accent); box-shadow: 0 4px 20px rgba(107,155,209,0.1); }
+        
+        .scanner-console {
+            background: #000;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+        .scanner-console::-webkit-scrollbar { width: 6px; }
+        .scanner-console::-webkit-scrollbar-track { background: #1a1a1a; }
+        .scanner-console::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        .data-cell {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 12px;
+            border-radius: 6px;
+        }
+        
+        input, select, textarea {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(107,155,209,0.1);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--secondary); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { background: transparent; border-color: var(--border); color: var(--text-primary); }
+        .btn-outline:hover { background: var(--bg-elevated); }
+        .btn-sm { padding: 6px 12px; font-size: 11px; }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+        
+        .hidden { display: none !important; }
+        .admin-view { display: none; }
+        .show-admin .admin-view { display: block; }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .status-online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+        .status-offline { background: var(--text-muted); }
+        
+        .pro-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .pro-table th {
+            background: var(--bg-elevated);
+            padding: 12px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+        }
+        .pro-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .pro-table tr:hover {
+            background: var(--bg-elevated);
+        }
+        
+        .filter-chip {
+            display: inline-block;
+            padding: 6px 12px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 11px;
+            margin: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-chip:hover {
+            border-color: var(--accent);
+            background: var(--primary);
+        }
+        .filter-chip.active {
+            background: var(--primary);
+            border-color: var(--accent);
+            color: white;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <!-- HEADER -->
+    <div class="pro-header p-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center text-white font-bold shadow-lg">
+                <i class="fa-solid fa-car-burst"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-sm tracking-tight">SISTEMA AUTOMOTRIZ PRO</h1>
+                <p class="text-[10px] text-gray-400">Taller • <span id="owner-name" contenteditable="true" class="text-blue-400 cursor-pointer hover:underline">Fernando Millán</span></p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-xs text-gray-400">
+                <span class="status-dot status-online"></span>
+                <span id="connection-status">Sistema Activo</span>
+            </div>
+            <button onclick="toggleSettings()" class="text-gray-400 hover:text-white">
+                <i class="fa-solid fa-gear text-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <div class="bg-[#1a1f2e] border-b border-gray-800 px-4 flex gap-2 overflow-x-auto" id="navigation-tabs">
+        <button onclick="switchView('dashboard')" class="tab-btn active" id="tab-dashboard">
+            <i class="fa-solid fa-gauge-high mr-2"></i>Dashboard
+        </button>
+        <button onclick="switchView('scanner')" class="tab-btn" id="tab-scanner">
+            <i class="fa-solid fa-microchip mr-2"></i>Scanner
+        </button>
+        <button onclick="switchView('technical')" class="tab-btn" id="tab-technical">
+            <i class="fa-solid fa-book-bookmark mr-2"></i>Datos Técnicos
+        </button>
+        <button onclick="switchView('inventory')" class="tab-btn" id="tab-inventory">
+            <i class="fa-solid fa-boxes-stacked mr-2"></i>Refacciones
+        </button>
+        <button onclick="switchView('keys')" class="tab-btn" id="tab-keys">
+            <i class="fa-solid fa-key mr-2"></i>Llaves
+        </button>
+        <button onclick="switchView('throttle')" class="tab-btn" id="tab-throttle">
+            <i class="fa-solid fa-gauge mr-2"></i>TBI
+        </button>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main-content" class="flex-1 overflow-y-auto p-4 bg-[#0f1419]">
+
+        <!-- DASHBOARD -->
+        <div id="view-dashboard" style="display: block;">
+            <div class="pro-card">
+                <h2 class="font-bold text-lg mb-4">🚗 Bienvenido al Sistema Automotriz Profesional</h2>
+                <p class="text-gray-400 mb-6">Sistema completo con Scanner OBD2, Base de Datos Técnica 1990-2025 y Gestión de Inventario</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-[#252d3d] p-4 rounded-lg border border-gray-700">
+                        <div class="text-3xl mb-2">📊</div>
+                        <h3 class="font-bold mb-1">150+ Modelos</h3>
+                        <p class="text-xs text-gray-400">Base de datos 1990-2025</p>
+                    </div>
+                    <div class="bg-[#252d3d] p-4 rounded-lg border border-gray-700">
+                        <div class="text-3xl mb-2">🔧</div>
+                        <h3 class="font-bold mb-1">Scanner Profesional</h3>
+                        <p class="text-xs text-gray-400">OBD2 bidireccional en tiempo real</p>
+                    </div>
+                    <div class="bg-[#252d3d] p-4 rounded-lg border border-gray-700">
+                        <div class="text-3xl mb-2">📦</div>
+                        <h3 class="font-bold mb-1">55+ Refacciones</h3>
+                        <p class="text-xs text-gray-400">Control de inventario inteligente</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
+                    <h3 class="font-bold mb-2 text-blue-400">🎯 Acceso Rápido</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        <button onclick="switchView('scanner')" class="text-left p-3 bg-[#252d3d] rounded hover:bg-[#2d3748]">
+                            <div class="font-bold text-sm">Scanner OBD2</div>
+                            <div class="text-xs text-gray-400">Diagnóstico en vivo</div>
+                        </button>
+                        <button onclick="switchView('technical')" class="text-left p-3 bg-[#252d3d] rounded hover:bg-[#2d3748]">
+                            <div class="font-bold text-sm">Datos Técnicos</div>
+                            <div class="text-xs text-gray-400">Diagramas y pinout</div>
+                        </button>
+                        <button onclick="switchView('inventory')" class="text-left p-3 bg-[#252d3d] rounded hover:bg-[#2d3748]">
+                            <div class="font-bold text-sm">Inventario</div>
+                            <div class="text-xs text-gray-400">Gestión de stock</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCANNER -->
+        <div id="view-scanner" style="display: none;">
+            <div class="pro-card">
+                <h2 class="font-bold text-lg mb-4">🔧 Scanner OBD2 Profesional</h2>
+                <p class="text-gray-400 mb-4">Conecta tu dispositivo Bluetooth OBD2 para diagnóstico en tiempo real</p>
+                <button class="btn btn-primary">
+                    <i class="fa-brands fa-bluetooth mr-2"></i>
+                    Conectar Dispositivo OBD2
+                </button>
+                <div class="scanner-console mt-4 font-mono">
+                    <div class="text-gray-500">[SYSTEM] Esperando conexión...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TECHNICAL -->
+        <div id="view-technical" style="display: none;">
+            <div class="pro-card">
+                <h2 class="font-bold text-lg mb-4">📚 Base de Datos Técnica 1990-2025</h2>
+                <p class="text-gray-400 mb-4">150+ modelos con diagramas, pinout ECU y especificaciones</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <select class="text-sm">
+                        <option>Seleccionar Marca</option>
+                        <option>NISSAN</option>
+                        <option>VOLKSWAGEN</option>
+                        <option>CHEVROLET</option>
+                        <option>FORD</option>
+                        <option>HONDA</option>
+                        <option>TOYOTA</option>
+                    </select>
+                    <select class="text-sm">
+                        <option>Seleccionar Modelo</option>
+                    </select>
+                    <select class="text-sm">
+                        <option>Seleccionar Motor</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- INVENTORY -->
+        <div id="view-inventory" style="display: none;">
+            <div class="pro-card">
+                <h2 class="font-bold text-lg mb-4">📦 Gestión de Refacciones</h2>
+                <p class="text-gray-400 mb-4">Control de inventario con 55+ productos</p>
+                <input type="text" placeholder="🔍 Buscar producto..." class="mb-4 text-sm">
+                <div class="text-center text-gray-500 py-8">
+                    Sistema de inventario disponible
+                </div>
+            </div>
+        </div>
+
+        <!-- KEYS -->
+        <div id="view-keys" style="display: none;">
+            <div class="pro-card">
+                <h2 class="font-bold text-lg mb-4">🔑 Programación de Llaves</h2>
+                <p class="text-gray-400 mb-4">Procedimientos para programar llaves e inmovilizadores</p>
+                <select class="mb-3 text-sm">
+                    <option>Seleccionar Marca</option>
+                    <option>NISSAN</option>
+                    <option>VOLKSWAGEN</option>
+                    <option>CHEVROLET</option>
+                </select>
+                <select class="text-sm">
+                    <option>Seleccionar Modelo</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- THROTTLE -->
+        <div id="view-throttle" style="display: none;">
+            <div class="pro-card">
+                <h2 class="font-bold text-lg mb-4">⚙️ Ajuste Cuerpo de Aceleración</h2>
+                <p class="text-gray-400 mb-4">Procedimientos de reseteo y reaprendizaje del TBI</p>
+                <select class="mb-3 text-sm">
+                    <option>Seleccionar Marca</option>
+                    <option>NISSAN</option>
+                    <option>VOLKSWAGEN</option>
+                    <option>CHEVROLET</option>
+                </select>
+                <select class="text-sm">
+                    <option>Seleccionar Modelo</option>
+                </select>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        console.log('=== SISTEMA AUTOMOTRIZ PRO ===');
+        console.log('✓ Sistema inicializado correctamente');
+        console.log('📱 Versión: 1.0.0');
+        console.log('👨‍💻 Desarrollado por: Fernando Millán');
+    </script>
+</body>
+</html>
