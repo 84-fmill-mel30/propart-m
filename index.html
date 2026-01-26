@@ -173,7 +173,52 @@
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
+<body<script>
+    // Variables para el ELM327
+    let bluetoothDevice;
+    let gattServer;
+    let commandCharacteristic;
+
+    // Función para conectar al ELM327 (Bluetooth 4.0 / BLE)
+    async function conectarScanner() {
+        try {
+            alert("Buscando Escáner ELM327...");
+            
+            // 1. Pide al usuario seleccionar el dispositivo
+            bluetoothDevice = await navigator.bluetooth.requestDevice({
+                filters: [{ namePrefix: 'OBD' }], // Busca nombres como OBDII, OBD-Link
+                optionalServices: ['0000fff0-0000-1000-8000-00805f9b34fb'] // Servicio común de ELM327
+            });
+
+            // 2. Conecta al servidor GATT
+            gattServer = await bluetoothDevice.gatt.connect();
+            alert("¡Conectado a: " + bluetoothDevice.name + "!");
+
+            // 3. Obtiene el servicio y la característica para escribir comandos
+            const service = await gattServer.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
+            commandCharacteristic = await service.getCharacteristic('0000fff1-0000-1000-8000-00805f9b34fb');
+
+            // 4. Cambia el botón a verde
+            document.getElementById('btn-connect').style.background = 'green';
+            document.getElementById('btn-connect').innerText = 'CONECTADO ✅';
+            
+            // 5. Iniciar protocolo (Comandos básicos AT)
+            enviarComando("AT Z"); // Reset
+            enviarComando("AT SP 0"); // Protocolo automático
+
+        } catch (error) {
+            console.log(error);
+            alert("Error de conexión: " + error);
+        }
+    }
+
+    async function enviarComando(comando) {
+        if (!commandCharacteristic) return;
+        // Convierte el texto a bytes para enviarlo
+        let encoder = new TextEncoder('utf-8');
+        await commandCharacteristic.writeValue(encoder.encode(comando + '\r'));
+    }
+</script>>
 
     <header>
         <div class="brand">PROPART <span>MILLÁN</span></div>
@@ -461,6 +506,10 @@
             margin-top: 20px;
         }
 
+<div class="big-btn" id="btn-connect" onclick="conectarScanner()">
+    <i class="fas fa-satellite-dish"></i>
+    CONECTAR ESCÁNER
+</div>
         .tile {
             background: var(--panel-dark);
             border: 1px solid #333;
