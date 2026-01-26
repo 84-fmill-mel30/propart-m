@@ -1,13 +1,15 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProPart Millán - Scanner & Parts</title>
+    <title>ProPart Millán - Scanner</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
     
     <style>
+        /* ESTILOS LIMPIOS - NO TOCAR */
         :root { --primary: #00d2ff; --bg: #121212; --panel: #1e1e1e; --text: #fff; --success: #00ff88; }
         body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; user-select: none; }
         
@@ -58,11 +60,13 @@
             <div class="tile connect" onclick="conectarScanner()">
                 <i class="fas fa-plug" id="icon-conn"></i>
                 <h3 id="text-conn">CONECTAR ESCÁNER</h3>
-                <small style="color:#aaa;">Click aquí para iniciar</small>
+                <small style="color:#aaa;">Bluetooth ELM327</small>
             </div>
+            
             <div class="tile" onclick="alert('Función PRO: Base de datos de refacciones')">
                 <i class="fas fa-cogs"></i><h3>Refacciones</h3>
             </div>
+            
             <div class="tile" onclick="irScanner()">
                 <i class="fas fa-tachometer-alt"></i><h3>Ver Datos</h3>
             </div>
@@ -93,7 +97,8 @@
     async function conectarScanner() {
         try {
             log("📡 Buscando dispositivos...");
-            // AQUÍ ESTÁ EL CAMBIO CLAVE: "acceptAllDevices: true"
+            
+            // ESTA LÍNEA ES LA CLAVE: BUSCA TODO
             device = await navigator.bluetooth.requestDevice({
                 acceptAllDevices: true, 
                 optionalServices: ['0000fff0-0000-1000-8000-00805f9b34fb']
@@ -107,10 +112,11 @@
             // CONECTADO
             document.getElementById('led').classList.add('on');
             document.getElementById('text-conn').innerText = "CONECTADO ✅";
+            document.getElementById('icon-conn').className = "fas fa-link";
             log("¡CONEXIÓN EXITOSA!");
             
             // INICIAR PROTOCOLO
-            await enviar("ATZ");
+            await enviar("ATZ"); // Reset
             setTimeout(() => irScanner(), 1500); // Ir a pantalla de datos solito
             
         } catch (e) {
@@ -120,7 +126,7 @@
     }
 
     async function enviar(cmd) {
-        if(!char) return alert("Primero conecta el escáner");
+        if(!char) return alert("Primero conecta el escáner (Botón Arriba)");
         try {
             let enc = new TextEncoder();
             await char.writeValue(enc.encode(cmd + "\r"));
@@ -134,8 +140,10 @@
         c.scrollTop = c.scrollHeight;
     }
     
-    // SERVICE WORKER
-    if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+    // REGISTRO PWA
+    if('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
 </script>
 
 </body>
