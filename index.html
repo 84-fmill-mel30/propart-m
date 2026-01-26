@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -8,1231 +8,135 @@
     <meta name="theme-color" content="#121212">
     
     <style>
-        :root {
-            --primary-color: #00d2ff; /* Azul Neón */
-            --accent-color: #ff3d00;  /* Naranja Alerta */
-            --bg-dark: #121212;
-            --panel-dark: #1e1e1e;
-            --text-main: #ffffff;
-            --success: #00ff88;
-        }
-
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            margin: 0;
-            padding: 0;
-            user-select: none; /* Evita seleccionar texto al picar botones */
-        }
-
-        /* --- ENCABEZADO TIPO TABLERO --- */
-        header {
-            background: linear-gradient(180deg, #000 0%, #1a1a1a 100%);
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--primary-color);
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
-        }
-
-        .brand {
-            font-size: 1.2rem;
-            font-weight: 800;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
+        :root { --primary: #00d2ff; --bg: #121212; --panel: #1e1e1e; --text: #fff; --success: #00ff88; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; user-select: none; }
         
-        .brand span { color: var(--primary-color); }
+        /* HEADER */
+        header { background: #000; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); }
+        .brand { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; }
+        .brand span { color: var(--primary); }
+        .led { width: 12px; height: 12px; background: #333; border-radius: 50%; border: 2px solid #555; }
+        .led.on { background: var(--success); box-shadow: 0 0 10px var(--success); }
 
-        .status-led {
-            width: 12px;
-            height: 12px;
-            background-color: #333;
-            border-radius: 50%;
-            border: 2px solid #555;
-            box-shadow: inset 0 0 5px #000;
-        }
+        /* CONTENEDOR */
+        .container { padding: 20px; max-width: 800px; margin: 0 auto; }
         
-        .status-led.on {
-            background-color: var(--success);
-            box-shadow: 0 0 10px var(--success);
-            border-color: #fff;
-        }
-
-        /* --- CONTENEDOR PRINCIPAL --- */
-        .container {
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        /* --- BOTONES GRANDES (GRID) --- */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 columnas */
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .tile {
-            background: var(--panel-dark);
-            border: 1px solid #333;
-            border-radius: 15px;
-            padding: 25px 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .tile:active { transform: scale(0.96); background: #252525; }
+        /* BOTONES */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .tile { background: var(--panel); border: 1px solid #333; border-radius: 15px; padding: 25px 10px; text-align: center; cursor: pointer; }
+        .tile:active { transform: scale(0.96); background: #333; }
+        .tile i { font-size: 2rem; color: var(--primary); display: block; margin-bottom: 10px; }
+        .tile.connect { grid-column: span 2; background: rgba(0, 210, 255, 0.1); border-color: var(--primary); }
         
-        .tile i {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            display: block;
-            color: var(--primary-color);
-        }
-
-        .tile h3 { margin: 0; font-size: 0.9rem; text-transform: uppercase; }
-
-        /* Botón especial de conectar */
-        .tile.connect {
-            grid-column: span 2; /* Ocupa todo el ancho */
-            background: rgba(0, 210, 255, 0.1);
-            border-color: var(--primary-color);
-        }
-
-        /* --- PANTALLAS (SECCIONES) --- */
-        .screen { display: none; animation: fadeIn 0.3s; }
-        .screen.active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- BUSCADOR DE PIEZAS --- */
-        .form-group { margin-bottom: 15px; }
+        /* PANTALLAS */
+        .screen { display: none; }
+        .screen.active { display: block; animation: fade 0.3s; }
+        @keyframes fade { from {opacity:0} to {opacity:1} }
         
-        select, input {
-            width: 100%;
-            padding: 15px;
-            background: #2a2a2a;
-            border: 1px solid #444;
-            color: #fff;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-        }
+        /* CONSOLA */
+        #console { background: #000; color: var(--success); font-family: monospace; padding: 10px; height: 150px; overflow-y: auto; border: 1px solid #333; margin-bottom: 15px; font-size: 0.8rem; }
+        .btn-back { background: #333; color: #fff; border: none; padding: 10px 20px; border-radius: 20px; margin-bottom: 15px; }
 
-        select:focus { border-color: var(--primary-color); }
-
-        .part-card {
-            background: #1f1f1f;
-            border-left: 4px solid var(--accent-color);
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 0 8px 8px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .part-price {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--success);
-        }
-
-        /* --- CONSOLA DE COMANDOS (SCANNER) --- */
-        #console-output {
-            background: #000;
-            color: var(--success);
-            font-family: 'Courier New', monospace;
-            padding: 15px;
-            height: 150px;
-            overflow-y: auto;
-            border-radius: 8px;
-            border: 1px solid #333;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-        }
-
-        /* Botón Volver */
-        .btn-back {
-            background: transparent;
-            border: 1px solid #555;
-            color: #aaa;
-            padding: 10px 20px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            cursor: pointer;
-        }
-
+        /* Iconos */
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body<script>
-    // Variables para el ELM327
-    let bluetoothDevice;
-    let gattServer;
-    let commandCharacteristic;
+<body>
 
-    // Función para conectar al ELM327 (Bluetooth 4.0 / BLE)
+<header>
+    <div class="brand">PROPART <span>MILLÁN</span></div>
+    <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:0.7rem; color:#aaa;">SYSTEM</span>
+        <div id="led" class="led"></div>
+    </div>
+</header>
+
+<div class="container">
+    <div id="menu" class="screen active">
+        <h2 style="text-align:center;">Panel de Control</h2>
+        <div class="grid">
+            <div class="tile connect" onclick="conectarScanner()">
+                <i class="fas fa-plug" id="icon-conn"></i>
+                <h3 id="text-conn">CONECTAR ESCÁNER</h3>
+                <small style="color:#aaa;">Click aquí para iniciar</small>
+            </div>
+            <div class="tile" onclick="alert('Función PRO: Base de datos de refacciones')">
+                <i class="fas fa-cogs"></i><h3>Refacciones</h3>
+            </div>
+            <div class="tile" onclick="irScanner()">
+                <i class="fas fa-tachometer-alt"></i><h3>Ver Datos</h3>
+            </div>
+        </div>
+    </div>
+
+    <div id="scanner" class="screen">
+        <button class="btn-back" onclick="irMenu()">Volver</button>
+        <h2>Diagnóstico en Vivo</h2>
+        <div id="console">Esperando conexión...<br>>_</div>
+        <div class="grid">
+            <button class="tile" onclick="enviar('0105')">TEMP MOTOR</button>
+            <button class="tile" onclick="enviar('010C')">RPM</button>
+            <button class="tile" onclick="enviar('03')">LEER CÓDIGOS</button>
+            <button class="tile" style="color:red; border-color:red" onclick="enviar('04')">BORRAR CÓDIGOS</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // NAVEGACIÓN
+    function irMenu() { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById('menu').classList.add('active'); }
+    function irScanner() { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById('scanner').classList.add('active'); }
+
+    // BLUETOOTH
+    let device, server, service, char;
+    
     async function conectarScanner() {
         try {
-            alert("Buscando Escáner ELM327...");
-            
-            // 1. Pide al usuario seleccionar el dispositivo
-            bluetoothDevice = await navigator.bluetooth.requestDevice({
-                filters: [{ namePrefix: 'OBD' }], // Busca nombres como OBDII, OBD-Link
-                optionalServices: ['0000fff0-0000-1000-8000-00805f9b34fb'] // Servicio común de ELM327
+            log("📡 Buscando dispositivos...");
+            // AQUÍ ESTÁ EL CAMBIO CLAVE: "acceptAllDevices: true"
+            device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true, 
+                optionalServices: ['0000fff0-0000-1000-8000-00805f9b34fb']
             });
-
-            // 2. Conecta al servidor GATT
-            gattServer = await bluetoothDevice.gatt.connect();
-            alert("¡Conectado a: " + bluetoothDevice.name + "!");
-
-            // 3. Obtiene el servicio y la característica para escribir comandos
-            const service = await gattServer.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
-            commandCharacteristic = await service.getCharacteristic('0000fff1-0000-1000-8000-00805f9b34fb');
-
-            // 4. Cambia el botón a verde
-            document.getElementById('btn-connect').style.background = 'green';
-            document.getElementById('btn-connect').innerText = 'CONECTADO ✅';
             
-            // 5. Iniciar protocolo (Comandos básicos AT)
-            enviarComando("AT Z"); // Reset
-            enviarComando("AT SP 0"); // Protocolo automático
-
-        } catch (error) {
-            console.log(error);
-            alert("Error de conexión: " + error);
+            log("Conectando a " + device.name + "...");
+            server = await device.gatt.connect();
+            service = await server.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
+            char = await service.getCharacteristic('0000fff1-0000-1000-8000-00805f9b34fb');
+            
+            // CONECTADO
+            document.getElementById('led').classList.add('on');
+            document.getElementById('text-conn').innerText = "CONECTADO ✅";
+            log("¡CONEXIÓN EXITOSA!");
+            
+            // INICIAR PROTOCOLO
+            await enviar("ATZ");
+            setTimeout(() => irScanner(), 1500); // Ir a pantalla de datos solito
+            
+        } catch (e) {
+            log("❌ Error: " + e);
+            alert("Error: " + e);
         }
     }
 
-    async function enviarComando(comando) {
-        if (!commandCharacteristic) return;
-        // Convierte el texto a bytes para enviarlo
-        let encoder = new TextEncoder('utf-8');
-        await commandCharacteristic.writeValue(encoder.encode(comando + '\r'));
+    async function enviar(cmd) {
+        if(!char) return alert("Primero conecta el escáner");
+        try {
+            let enc = new TextEncoder();
+            await char.writeValue(enc.encode(cmd + "\r"));
+            log(">> " + cmd);
+        } catch(e) { log("Error envío: " + e); }
     }
-</script>>
 
-    <header>
-        <div class="brand">PROPART <span>MILLÁN</span></div>
-        <div style="display:flex; align-items:center; gap:10px;">
-            <span style="font-size:0.7rem; color:#aaa;">OBD2</span>
-            <div id="connection-led" class="status-led"></div>
-        </div>
-    </header>
+    function log(txt) {
+        let c = document.getElementById('console');
+        c.innerHTML += "<div>" + txt + "</div>";
+        c.scrollTop = c.scrollHeight;
+    }
+    
+    // SERVICE WORKER
+    if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
 
-    <div class="container">
-
-        <div id="menu-screen" class="screen active">
-            <h2 style="font-weight:300; margin-bottom:20px;">Panel de Control</h2>
-            
-            <div class="dashboard-grid">
-                <div class="tile connect" onclick="conectarScanner()">
-                    <i class="fas fa-plug" id="icon-conn"></i>
-                    <h3 id="text-conn">Conectar Escáner</h3>
-                    <div style="font-size:0.7rem; color:#aaa; margin-top:5px;">Bluetooth ELM327</div>
-                </div>
-
-                <div class="tile" onclick="irA('parts-screen')">
-                    <i class="fas fa-cogs"></i>
-                    <h3>Refacciones</h3>
-                </div>
-
-                <div class="tile" onclick="irA('scanner-screen')">
-                    <i class="fas fa-heartbeat"></i>
-                    <h3>Diagnóstico</h3>
-                </div>
-
-                <div class="tile" onclick="alert('Función disponible en versión PRO')">
-                    <i class="fas fa-project-diagram"></i>
-                    <h3>Diagramas</h3>
-                </div>
-
-                <div class="tile" onclick="alert('Gestión de Taller próximamente')">
-                    <i class="fas fa-user-cog"></i>
-                    <h3>Mi Taller</h3>
-                </div>
-            </div>
-        </div>
-
-        <div id="parts-screen" class="screen">
-            <button class="btn-back" onclick="irA('menu-screen')"><i class="fas fa-arrow-left"></i> Volver</button>
-            <h2>Buscador de Piezas</h2>
-
-            <div class="form-group">
-                <select id="makeSelect" onchange="populateModels()">
-                    <option value="">Selecciona Marca</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <select id="modelSelect" onchange="populateYears()" disabled>
-                    <option value="">Selecciona Modelo</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <select id="yearSelect" onchange="showParts()" disabled>
-                    <option value="">Selecciona Año/Motor</option>
-                </select>
-            </div>
-
-            <div id="parts-results"></div>
-        </div>
-
-        <div id="scanner-screen" class="screen">
-            <button class="btn-back" onclick="irA('menu-screen')"><i class="fas fa-arrow-left"></i> Volver</button>
-            <h2>Datos en Vivo</h2>
-            
-            <div id="console-output">Esperando conexión...<br>>_</div>
-            
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button class="tile" style="padding:15px;" onclick="enviarComando('01 05')">Temp. Motor</button>
-                <button class="tile" style="padding:15px;" onclick="enviarComando('01 0C')">RPM</button>
-                <button class="tile" style="padding:15px;" onclick="enviarComando('01 0D')">Velocidad</button>
-                <button class="tile" style="padding:15px;" onclick="enviarComando('03')">Leer Códigos</button>
-                <button class="tile" style="padding:15px; border-color:red; color:red;" onclick="enviarComando('04')">Borrar Códigos</button>
-            </div>
-        </div>
-
-    </div>
-
-    <script>
-        // --- NAVEGACIÓN ---
-        function irA(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        // --- BASE DE DATOS DE REFACCIONES ---
-        const db = {
-            "Volkswagen": {
-                "Jetta A4 (Clásico)": {
-                    "2.0L (1999-2015)": [
-                        {name: "Bobina de Encendido", brand: "Beru", price: "$650", code: "06A-905-115"},
-                        {name: "Sensor MAF", brand: "Bosch", price: "$1,200", code: "06A-906-461"},
-                        {name: "Bomba de Agua", brand: "Gates", price: "$450", code: "CP-4545"}
-                    ],
-                    "1.8 Turbo": [
-                        {name: "Válvula N75", brand: "Pierburg", price: "$980", code: "058-906-283"},
-                        {name: "Bobina Roja R8", brand: "NGK", price: "$850 c/u", code: "U5014"}
-                    ]
-                },
-                "Vento": {
-                    "1.6L (Todos)": [
-                        {name: "Juego de Bujías", brand: "NGK", price: "$320", code: "ZFR6T"},
-                        {name: "Filtro de Aceite", brand: "Mann", price: "$150", code: "W712/94"}
-                    ]
-                }
-            },
-            "Nissan": {
-                "Tsuru III": {
-                    "1.6L 16V": [
-                        {name: "Distribuidor Completo", brand: "Hitachi", price: "$1,800", code: "D4T92-01"},
-                        {name: "Sensor TPS", brand: "Tomco", price: "$350", code: "TPS-343"}
-                    ]
-                },
-                "Versa": {
-                    "1.6L (2012-2019)": [
-                        {name: "Amortiguador Del.", brand: "KYB", price: "$1,450", code: "339234"},
-                        {name: "Horquilla Der.", brand: "Syd", price: "$850", code: "1515004"}
-                    ]
-                }
-            }
-        };
-
-        // Lógica de Refacciones
-        const makeSelect = document.getElementById('makeSelect');
-        const modelSelect = document.getElementById('modelSelect');
-        const yearSelect = document.getElementById('yearSelect');
-
-        // Llenar marcas al inicio
-        for(let make in db) makeSelect.add(new Option(make, make));
-
-        window.populateModels = function() {
-            modelSelect.innerHTML = '<option>Selecciona Modelo</option>';
-            modelSelect.disabled = false;
-            let make = makeSelect.value;
-            if(db[make]) {
-                for(let model in db[make]) modelSelect.add(new Option(model, model));
-            }
-        };
-
-        window.populateYears = function() {
-            yearSelect.innerHTML = '<option>Selecciona Año/Motor</option>';
-            yearSelect.disabled = false;
-            let make = makeSelect.value;
-            let model = modelSelect.value;
-            if(db[make] && db[make][model]) {
-                for(let year in db[make][model]) yearSelect.add(new Option(year, year));
-            }
-        };
-
-        window.showParts = function() {
-            let make = makeSelect.value;
-            let model = modelSelect.value;
-            let year = yearSelect.value;
-            let results = document.getElementById('parts-results');
-            results.innerHTML = '';
-
-            if(db[make][model][year]) {
-                db[make][model][year].forEach(part => {
-                    results.innerHTML += `
-                        <div class="part-card">
-                            <div>
-                                <div style="font-weight:bold; color:#fff;">${part.name}</div>
-                                <div style="font-size:0.8rem; color:#aaa;">${part.brand} | ${part.code}</div>
-                            </div>
-                            <div class="part-price">${part.price}</div>
-                        </div>
-                    `;
-                });
-            }
-        };
-
-        // --- BLUETOOTH ELM327 (OBD2) ---
-        let device, server, service, characteristic;
-
-        window.conectarScanner = async function() {
-            try {
-                logConsole("Buscando dispositivo OBDII...");
-                device = await navigator.bluetooth.requestDevice({
-                    filters: [{ namePrefix: 'OBD' }],
-                    optionalServices: ['0000fff0-0000-1000-8000-00805f9b34fb']
-                });
-
-                logConsole("Conectando a " + device.name + "...");
-                server = await device.gatt.connect();
-                service = await server.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
-                characteristic = await service.getCharacteristic('0000fff1-0000-1000-8000-00805f9b34fb');
-
-                // Éxito
-                document.getElementById('connection-led').classList.add('on');
-                document.getElementById('text-conn').innerText = "CONECTADO";
-                document.getElementById('text-conn').style.color = "#00ff88";
-                document.getElementById('icon-conn').className = "fas fa-link";
-                logConsole("¡CONEXIÓN EXITOSA! Protocolo listo.");
-                
-                // Configuración inicial del ELM
-                await enviarComando("AT Z");     // Reset
-                await enviarComando("AT SP 0");  // Protocolo automático
-                
-                // Ir directo a la pantalla de escáner
-                setTimeout(() => irA('scanner-screen'), 1000);
-
-            } catch (e) {
-                logConsole("Error: " + e);
-                alert("No se pudo conectar: " + e);
-            }
-        };
-
-        window.enviarComando = async function(cmd) {
-            if (!characteristic) {
-                logConsole("⚠️ No hay conexión. Conecta el escáner primero.");
-                return;
-            }
-            try {
-                logConsole(">> Envia: " + cmd);
-                let encoder = new TextEncoder();
-                await characteristic.writeValue(encoder.encode(cmd + '\r'));
-                // Aquí deberíamos leer la respuesta (valuechanged event), 
-                // por simplicidad en este demo solo enviamos.
-            } catch (e) {
-                logConsole("Error al enviar: " + e);
-            }
-        };
-
-        function logConsole(text) {
-            const consoleDiv = document.getElementById('console-output');
-            consoleDiv.innerHTML += `<div>${text}</div>`;
-            consoleDiv.scrollTop = consoleDiv.scrollHeight;
-        }
-
-        // --- REGISTRO PWA (Service Worker) ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('SW registrado', reg))
-                    .catch(err => console.log('SW falló', err));
-            });
-        }
-    </script>
-</body>
-</html>           border-bottom: 2px solid var(--primary-color);
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
-        }
-
-        .brand {
-            font-size: 1.2rem;
-            font-weight: 800;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        
-        .brand span { color: var(--primary-color); }
-
-        .status-led {
-            width: 12px;
-            height: 12px;
-            background-color: #333;
-            border-radius: 50%;
-            border: 2px solid #555;
-            box-shadow: inset 0 0 5px #000;
-        }
-        
-        .status-led.on {
-            background-color: var(--success);
-            box-shadow: 0 0 10px var(--success);
-            border-color: #fff;
-        }
-
-        /* --- CONTENEDOR PRINCIPAL --- */
-        .container {
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        /* --- BOTONES GRANDES (GRID) --- */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 columnas */
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-<div class="big-btn" id="btn-connect" onclick="conectarScanner()">
-    <i class="fas fa-satellite-dish"></i>
-    CONECTAR ESCÁNER
-</div>
-        .tile {
-            background: var(--panel-dark);
-            border: 1px solid #333;
-            border-radius: 15px;
-            padding: 25px 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .tile:active { transform: scale(0.96); background: #252525; }
-        
-        .tile i {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            display: block;
-            color: var(--primary-color);
-        }
-
-        .tile h3 { margin: 0; font-size: 0.9rem; text-transform: uppercase; }
-
-        /* Botón especial de conectar */
-        .tile.connect {
-            grid-column: span 2; /* Ocupa todo el ancho */
-            background: rgba(0, 210, 255, 0.1);
-            border-color: var(--primary-color);
-        }
-
-        /* --- PANTALLAS (SECCIONES) --- */
-        .screen { display: none; animation: fadeIn 0.3s; }
-        .screen.active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- BUSCADOR DE PIEZAS --- */
-        .form-group { margin-bottom: 15px; }
-        
-        select, input {
-            width: 100%;
-            padding: 15px;
-            background: #2a2a2a;
-            border: 1px solid #444;
-            color: #fff;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-        }
-
-        select:focus { border-color: var(--primary-color); }
-
-        .part-card {
-            background: #1f1f1f;
-            border-left: 4px solid var(--accent-color);
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 0 8px 8px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .part-price {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--success);
-        }
-
-        /* --- CONSOLA DE COMANDOS (SCANNER) --- */
-        #console-output {
-            background: #000;
-            color: var(--success);
-            font-family: 'Courier New', monospace;
-            padding: 15px;
-            height: 150px;
-            overflow-y: auto;
-            border-radius: 8px;
-            border: 1px solid #333;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-        }
-
-        /* Botón Volver */
-        .btn-back {
-            background: transparent;
-            border: 1px solid #555;
-            color: #aaa;
-            padding: 10px 20px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            cursor: pointer;
-        }
-
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-
-    <header>
-        <div class="brand">PROPART <span>MILLÁN</span></div>
-        <div style="display:flex; align-items:center; gap:10px;">
-            <span style="font-size:0.7rem; color:#aaa;">OBD2</span>
-            <div id="connection-led" class="status-led"></div>
-        </div>
-    </header>
-
-    <div class="container">
-
-        <div id="menu-screen" class="screen active">
-            <h2 style="font-weight:300; margin-bottom:20px;">Panel de Control</h2>
-            
-            <div class="dashboard-grid">
-                <div class="tile connect" onclick="conectarScanner()">
-                    <i class="fas fa-plug" id="icon-conn"></i>
-                    <h3 id="text-conn">Conectar Escáner</h3>
-                    <div style="font-size:0.7rem; color:#aaa; margin-top:5px;">Bluetooth ELM327</div>
-                </div>
-
-                <div class="tile" onclick="irA('parts-screen')">
-                    <i class="fas fa-cogs"></i>
-                    <h3>Refacciones</h3>
-                </div>
-
-                <div class="tile" onclick="irA('scanner-screen')">
-                    <i class="fas fa-heartbeat"></i>
-                    <h3>Diagnóstico</h3>
-                </div>
-
-                <div class="tile" onclick="alert('Función disponible en versión PRO')">
-                    <i class="fas fa-project-diagram"></i>
-                    <h3>Diagramas</h3>
-                </div>
-
-                <div class="tile" onclick="alert('Gestión de Taller próximamente')">
-                    <i class="fas fa-user-cog"></i>
-                    <h3>Mi Taller</h3>
-                </div>
-            </div>
-        </div>
-
-        <div id="parts-screen" class="screen">
-            <button class="btn-back" onclick="irA('menu-screen')"><i class="fas fa-arrow-left"></i> Volver</button>
-            <h2>Buscador de Piezas</h2>
-
-            <div class="form-group">
-                <select id="makeSelect" onchange="populateModels()">
-                    <option value="">Selecciona Marca</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <select id="modelSelect" onchange="populateYears()" disabled>
-                    <option value="">Selecciona Modelo</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <select id="yearSelect" onchange="showParts()" disabled>
-                    <option value="">Selecciona Año/Motor</option>
-                </select>
-            </div>
-
-            <div id="parts-results"></div>
-        </div>
-
-        <div id="scanner-screen" class="screen">
-            <button class="btn-back" onclick="irA('menu-screen')"><i class="fas fa-arrow-left"></i> Volver</button>
-            <h2>Datos en Vivo</h2>
-            
-            <div id="console-output">Esperando conexión...<br>>_</div>
-            
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button class="tile" style="padding:15px;" onclick="enviarComando('01 05')">Temp. Motor</button>
-                <button class="tile" style="padding:15px;" onclick="enviarComando('01 0C')">RPM</button>
-                <button class="tile" style="padding:15px;" onclick="enviarComando('01 0D')">Velocidad</button>
-                <button class="tile" style="padding:15px;" onclick="enviarComando('03')">Leer Códigos</button>
-                <button class="tile" style="padding:15px; border-color:red; color:red;" onclick="enviarComando('04')">Borrar Códigos</button>
-            </div>
-        </div>
-
-    </div>
-
-    <script>
-        // --- NAVEGACIÓN ---
-        function irA(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        // --- BASE DE DATOS DE REFACCIONES ---
-        const db = {
-            "Volkswagen": {
-                "Jetta A4 (Clásico)": {
-                    "2.0L (1999-2015)": [
-                        {name: "Bobina de Encendido", brand: "Beru", price: "$650", code: "06A-905-115"},
-                        {name: "Sensor MAF", brand: "Bosch", price: "$1,200", code: "06A-906-461"},
-                        {name: "Bomba de Agua", brand: "Gates", price: "$450", code: "CP-4545"}
-                    ],
-                    "1.8 Turbo": [
-                        {name: "Válvula N75", brand: "Pierburg", price: "$980", code: "058-906-283"},
-                        {name: "Bobina Roja R8", brand: "NGK", price: "$850 c/u", code: "U5014"}
-                    ]
-                },
-                "Vento": {
-                    "1.6L (Todos)": [
-                        {name: "Juego de Bujías", brand: "NGK", price: "$320", code: "ZFR6T"},
-                        {name: "Filtro de Aceite", brand: "Mann", price: "$150", code: "W712/94"}
-                    ]
-                }
-            },
-            "Nissan": {
-                "Tsuru III": {
-                    "1.6L 16V": [
-                        {name: "Distribuidor Completo", brand: "Hitachi", price: "$1,800", code: "D4T92-01"},
-                        {name: "Sensor TPS", brand: "Tomco", price: "$350", code: "TPS-343"}
-                    ]
-                },
-                "Versa": {
-                    "1.6L (2012-2019)": [
-                        {name: "Amortiguador Del.", brand: "KYB", price: "$1,450", code: "339234"},
-                        {name: "Horquilla Der.", brand: "Syd", price: "$850", code: "1515004"}
-                    ]
-                }
-            }
-        };
-
-        // Lógica de Refacciones
-        const makeSelect = document.getElementById('makeSelect');
-        const modelSelect = document.getElementById('modelSelect');
-        const yearSelect = document.getElementById('yearSelect');
-
-        // Llenar marcas al inicio
-        for(let make in db) makeSelect.add(new Option(make, make));
-
-        window.populateModels = function() {
-            modelSelect.innerHTML = '<option>Selecciona Modelo</option>';
-            modelSelect.disabled = false;
-            let make = makeSelect.value;
-            if(db[make]) {
-                for(let model in db[make]) modelSelect.add(new Option(model, model));
-            }
-        };
-
-        window.populateYears = function() {
-            yearSelect.innerHTML = '<option>Selecciona Año/Motor</option>';
-            yearSelect.disabled = false;
-            let make = makeSelect.value;
-            let model = modelSelect.value;
-            if(db[make] && db[make][model]) {
-                for(let year in db[make][model]) yearSelect.add(new Option(year, year));
-            }
-        };
-
-        window.showParts = function() {
-            let make = makeSelect.value;
-            let model = modelSelect.value;
-            let year = yearSelect.value;
-            let results = document.getElementById('parts-results');
-            results.innerHTML = '';
-
-            if(db[make][model][year]) {
-                db[make][model][year].forEach(part => {
-                    results.innerHTML += `
-                        <div class="part-card">
-                            <div>
-                                <div style="font-weight:bold; color:#fff;">${part.name}</div>
-                                <div style="font-size:0.8rem; color:#aaa;">${part.brand} | ${part.code}</div>
-                            </div>
-                            <div class="part-price">${part.price}</div>
-                        </div>
-                    `;
-                });
-            }
-        };
-
-        // --- BLUETOOTH ELM327 (OBD2) ---
-        let device, server, service, characteristic;
-
-        window.conectarScanner = async function() {
-            try {
-                logConsole("Buscando dispositivo OBDII...");
-                device = await navigator.bluetooth.requestDevice({
-                    filters: [{ namePrefix: 'OBD' }],
-                    optionalServices: ['0000fff0-0000-1000-8000-00805f9b34fb']
-                });
-
-                logConsole("Conectando a " + device.name + "...");
-                server = await device.gatt.connect();
-                service = await server.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
-                characteristic = await service.getCharacteristic('0000fff1-0000-1000-8000-00805f9b34fb');
-
-                // Éxito
-                document.getElementById('connection-led').classList.add('on');
-                document.getElementById('text-conn').innerText = "CONECTADO";
-                document.getElementById('text-conn').style.color = "#00ff88";
-                document.getElementById('icon-conn').className = "fas fa-link";
-                logConsole("¡CONEXIÓN EXITOSA! Protocolo listo.");
-                
-                // Configuración inicial del ELM
-                await enviarComando("AT Z");     // Reset
-                await enviarComando("AT SP 0");  // Protocolo automático
-                
-                // Ir directo a la pantalla de escáner
-                setTimeout(() => irA('scanner-screen'), 1000);
-
-            } catch (e) {
-                logConsole("Error: " + e);
-                alert("No se pudo conectar: " + e);
-            }
-        };
-
-        window.enviarComando = async function(cmd) {
-            if (!characteristic) {
-                logConsole("⚠️ No hay conexión. Conecta el escáner primero.");
-                return;
-            }
-            try {
-                logConsole(">> Envia: " + cmd);
-                let encoder = new TextEncoder();
-                await characteristic.writeValue(encoder.encode(cmd + '\r'));
-                // Aquí deberíamos leer la respuesta (valuechanged event), 
-                // por simplicidad en este demo solo enviamos.
-            } catch (e) {
-                logConsole("Error al enviar: " + e);
-            }
-        };
-
-        function logConsole(text) {
-            const consoleDiv = document.getElementById('console-output');
-            consoleDiv.innerHTML += `<div>${text}</div>`;
-            consoleDiv.scrollTop = consoleDiv.scrollHeight;
-        }
-
-        // --- REGISTRO PWA (Service Worker) ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('SW registrado', reg))
-                    .catch(err => console.log('SW falló', err));
-            });
-        }
-    </script>
-</body>
-</html>    }
-
-        .brand {
-            font-size: 1.2rem;
-            font-weight: 800;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        
-        .brand span { color: var(--primary-color); }
-
-        .status-led {
-            width: 12px;
-            height: 12px;
-            background-color: #333;
-            border-radius: 50%;
-            border: 2px solid #555;
-            box-shadow: inset 0 0 5px #000;
-        }
-        
-        .status-led.on {
-            background-color: var(--success);
-            box-shadow: 0 0 10px var(--success);
-            border-color: #fff;
-        }
-
-        /* --- CONTENEDOR PRINCIPAL --- */
-        .container {
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        /* --- BOTONES GRANDES (GRID) --- */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 columnas */
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .tile {
-            background: var(--panel-dark);
-            border: 1px solid #333;
-            border-radius: 15px;
-            padding: 25px 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .tile:active { transform: scale(0.96); background: #252525; }
-        
-        .tile i {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            display: block;
-            color: var(--primary-color);
-        }
-
-        .tile h3 { margin: 0; font-size: 0.9rem; text-transform: uppercase; }
-
-        /* Botón especial de conectar */
-        .tile.connect {
-            grid-column: span 2; /* Ocupa todo el ancho */
-            background: rgba(0, 210, 255, 0.1);
-            border-color: var(--primary-color);
-        }
-
-        /* --- PANTALLAS (SECCIONES) --- */
-        .screen { display: none; animation: fadeIn 0.3s; }
-        .screen.active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- BUSCADOR DE PIEZAS --- */
-        .form-group { margin-bottom: 15px; }
-        
-        select, input {
-            width: 100%;
-            padding: 15px;
-            background: #2a2a2a;
-            border: 1px solid #444;
-            color: #fff;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-        }
-
-        select:focus { border-color: var(--primary-color); }
-
-        .part-card {
-            background: #1f1f1f;
-            border-left: 4px solid var(--accent-color);
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 0 8px 8px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .part-price {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--success);
-        }
-
-        /* --- CONSOLA DE COMANDOS (SCANNER) --- */
-        #console-output {
-            background: #000;
-            color: var(--success);
-            font-family: 'Courier New', monospace;
-            padding: 15px;
-            height: 150px;
-            overflow-y: auto;
-            border-radius: 8px;
-            border: 1px solid #333;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-        }
-
-        /* Botón Volver */
-        .btn-back {
-            background: transparent;
-            border: 1px solid #555;
-            color: #aaa;
-            padding: 10px 20px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            cursor: pointer;
-        }
-
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-
-    <header>
-        <div class="brand">PROPART <span>MILLÁN</span></div>
-        <div style="display:flex; align-items:center; gap:10px;">
-            <span style="font-size:0.7rem; color:#aaa;">OBD2</span>
-            <div id="connection-led" class="status-led"></div>
-        </div>
-    </header>
-
-    <div class="container">
-
-        <div id="menu-screen" class="screen active">
-            <h2 style="font-weight:300; margin-bottom:20px;">Panel de Control</h2>
-            
-            <div class="dashboard-grid">
-                <div class="tile connect" onclick="conectarScanner()">
-                    <i class="fas fa-plug" id="icon-conn"></i>
-                    <h3 id="text-conn">Conectar Escáner</h3>
-                    <div style="font-size:0.7rem; color:#aaa; margin-top:5px;">Bluetooth ELM327</div>
-                </div>
-
-                <div class="tile" onclick="irA('parts-screen')">
-                    <i class="fas fa-cogs"></i>
-                    <h3>Refacciones</h3>
-                </div>
-
-                <div class="tile" onclick="irA('scanner-screen')">
-                    <i class="fas fa-heartbeat"></i>
-                    <h3>Diagnóstico</h3>
-                </div>
-
-                <div class="tile" onclick="alert('Función disponible en versión PRO')">
-                    <i class="fas fa-project-diagram"></i>
-                    <h3>Diagramas</h3>
-                </div>
-
-                <div class="tile" onclick="alert('Gestión de Taller próximamente')">
-                    <i class="fas fa-user-cog"></i>
-                    <h3>Mi Taller</h3>
-                </div>
-            </div>
-        </div>
-
-        <div id="parts-screen" class="screen">
-            <button class="btn-back" onclick="irA('menu-screen')"><i class="fas fa-arrow-left"></i> Volver</button>
-            <h2>Buscador de Piezas</h2>
-
-            <div class="form-group">
-                <select id="makeSelect" onchange="populateModels()">
-                    <option value="">Selecciona Marca</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <select id="modelSelect" onchange="populateYears()" disabled>
-                    <option value="">Selecciona Modelo</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <select id="yearSelect" onchange="showParts()" disabled>
-                    <option value="">Selecciona Año/Motor</option>
-                </select>
-            </div>
-
-            <div id="parts-results"></div>
-        </div>
-
-        <div id="scanner-screen" class="screen">
-            <button class="btn-back" onclick="irA('menu-screen')"><i class="fas fa-arrow-left"></i> Volver</button>
-            <h2>Datos en Vivo</h2>
-            
-            <div id="console-output">Esperando conexión...<br>>_</div>
-            
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button class="tile" style="padding:15px;" onclick="enviarComando('01 05')">Temp. Motor</button>
-                <button class="tile" style="padding:15px;" onclick="enviarComando('01 0C')">RPM</button>
-                <button class="tile" style="padding:15px;" onclick="enviarComando('01 0D')">Velocidad</button>
-                <button class="tile" style="padding:15px;" onclick="enviarComando('03')">Leer Códigos</button>
-                <button class="tile" style="padding:15px; border-color:red; color:red;" onclick="enviarComando('04')">Borrar Códigos</button>
-            </div>
-        </div>
-
-    </div>
-
-    <script>
-        // --- NAVEGACIÓN ---
-        function irA(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        // --- BASE DE DATOS DE REFACCIONES ---
-        const db = {
-            "Volkswagen": {
-                "Jetta A4 (Clásico)": {
-                    "2.0L (1999-2015)": [
-                        {name: "Bobina de Encendido", brand: "Beru", price: "$650", code: "06A-905-115"},
-                        {name: "Sensor MAF", brand: "Bosch", price: "$1,200", code: "06A-906-461"},
-                        {name: "Bomba de Agua", brand: "Gates", price: "$450", code: "CP-4545"}
-                    ],
-                    "1.8 Turbo": [
-                        {name: "Válvula N75", brand: "Pierburg", price: "$980", code: "058-906-283"},
-                        {name: "Bobina Roja R8", brand: "NGK", price: "$850 c/u", code: "U5014"}
-                    ]
-                },
-                "Vento": {
-                    "1.6L (Todos)": [
-                        {name: "Juego de Bujías", brand: "NGK", price: "$320", code: "ZFR6T"},
-                        {name: "Filtro de Aceite", brand: "Mann", price: "$150", code: "W712/94"}
-                    ]
-                }
-            },
-            "Nissan": {
-                "Tsuru III": {
-                    "1.6L 16V": [
-                        {name: "Distribuidor Completo", brand: "Hitachi", price: "$1,800", code: "D4T92-01"},
-                        {name: "Sensor TPS", brand: "Tomco", price: "$350", code: "TPS-343"}
-                    ]
-                },
-                "Versa": {
-                    "1.6L (2012-2019)": [
-                        {name: "Amortiguador Del.", brand: "KYB", price: "$1,450", code: "339234"},
-                        {name: "Horquilla Der.", brand: "Syd", price: "$850", code: "1515004"}
-                    ]
-                }
-            }
-        };
-
-        // Lógica de Refacciones
-        const makeSelect = document.getElementById('makeSelect');
-        const modelSelect = document.getElementById('modelSelect');
-        const yearSelect = document.getElementById('yearSelect');
-
-        // Llenar marcas al inicio
-        for(let make in db) makeSelect.add(new Option(make, make));
-
-        window.populateModels = function() {
-            modelSelect.innerHTML = '<option>Selecciona Modelo</option>';
-            modelSelect.disabled = false;
-            let make = makeSelect.value;
-            if(db[make]) {
-                for(let model in db[make]) modelSelect.add(new Option(model, model));
-            }
-        };
-
-        window.populateYears = function() {
-            yearSelect.innerHTML = '<option>Selecciona Año/Motor</option>';
-            yearSelect.disabled = false;
-            let make = makeSelect.value;
-            let model = modelSelect.value;
-            if(db[make] && db[make][model]) {
-                for(let year in db[make][model]) yearSelect.add(new Option(year, year));
-            }
-        };
-
-        window.showParts = function() {
-            let make = makeSelect.value;
-            let model = modelSelect.value;
-            let year = yearSelect.value;
-            let results = document.getElementById('parts-results');
-            results.innerHTML = '';
-
-            if(db[make][model][year]) {
-                db[make][model][year].forEach(part => {
-                    results.innerHTML += `
-                        <div class="part-card">
-                            <div>
-                                <div style="font-weight:bold; color:#fff;">${part.name}</div>
-                                <div style="font-size:0.8rem; color:#aaa;">${part.brand} | ${part.code}</div>
-                            </div>
-                            <div class="part-price">${part.price}</div>
-                        </div>
-                    `;
-                });
-            }
-        };
-
-        // --- BLUETOOTH ELM327 (OBD2) ---
-        let device, server, service, characteristic;
-
-        window.conectarScanner = async function() {
-            try {
-                logConsole("Buscando dispositivo OBDII...");
-                device = await navigator.bluetooth.requestDevice({
-                    filters: [{ namePrefix: 'OBD' }],
-                    optionalServices: ['0000fff0-0000-1000-8000-00805f9b34fb']
-                });
-
-                logConsole("Conectando a " + device.name + "...");
-                server = await device.gatt.connect();
-                service = await server.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
-                characteristic = await service.getCharacteristic('0000fff1-0000-1000-8000-00805f9b34fb');
-
-                // Éxito
-                document.getElementById('connection-led').classList.add('on');
-                document.getElementById('text-conn').innerText = "CONECTADO";
-                document.getElementById('text-conn').style.color = "#00ff88";
-                document.getElementById('icon-conn').className = "fas fa-link";
-                logConsole("¡CONEXIÓN EXITOSA! Protocolo listo.");
-                
-                // Configuración inicial del ELM
-                await enviarComando("AT Z");     // Reset
-                await enviarComando("AT SP 0");  // Protocolo automático
-                
-                // Ir directo a la pantalla de escáner
-                setTimeout(() => irA('scanner-screen'), 1000);
-
-            } catch (e) {
-                logConsole("Error: " + e);
-                alert("No se pudo conectar: " + e);
-            }
-        };
-
-        window.enviarComando = async function(cmd) {
-            if (!characteristic) {
-                logConsole("⚠️ No hay conexión. Conecta el escáner primero.");
-                return;
-            }
-            try {
-                logConsole(">> Envia: " + cmd);
-                let encoder = new TextEncoder();
-                await characteristic.writeValue(encoder.encode(cmd + '\r'));
-                // Aquí deberíamos leer la respuesta (valuechanged event), 
-                // por simplicidad en este demo solo enviamos.
-            } catch (e) {
-                logConsole("Error al enviar: " + e);
-            }
-        };
-
-        function logConsole(text) {
-            const consoleDiv = document.getElementById('console-output');
-            consoleDiv.innerHTML += `<div>${text}</div>`;
-            consoleDiv.scrollTop = consoleDiv.scrollHeight;
-        }
-
-        // --- REGISTRO PWA (Service Worker) ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('SW registrado', reg))
-                    .catch(err => console.log('SW falló', err));
-            });
-        }
-    </script>
 </body>
 </html>
