@@ -9,25 +9,28 @@
     <meta name="theme-color" content="#121212">
     
     <style>
-        /* ESTILOS */
         :root { --primary: #00d2ff; --bg: #121212; --panel: #1e1e1e; --text: #fff; --success: #00ff88; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; user-select: none; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; user-select: none; }
+        
         header { background: #000; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); }
         .brand { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; }
         .brand span { color: var(--primary); }
         .led { width: 12px; height: 12px; background: #333; border-radius: 50%; border: 2px solid #555; }
-        .led.on { background: var(--success); box-shadow: 0 0 10px var(--success); }
+        .led.on { background: var(--success); box-shadow: 0 0 10px var(--success); border-color: #fff; }
+
         .container { padding: 20px; max-width: 800px; margin: 0 auto; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        
         .tile { background: var(--panel); border: 1px solid #333; border-radius: 15px; padding: 25px 10px; text-align: center; cursor: pointer; }
-        .tile:active { transform: scale(0.96); background: #333; }
-        .tile i { font-size: 2rem; color: var(--primary); display: block; margin-bottom: 10px; }
+        .tile:active { transform: scale(0.96); background: #252525; }
+        .tile i { font-size: 2.5rem; color: var(--primary); display: block; margin-bottom: 10px; }
         .tile.connect { grid-column: span 2; background: rgba(0, 210, 255, 0.1); border-color: var(--primary); }
+        
         .screen { display: none; }
-        .screen.active { display: block; animation: fade 0.3s; }
-        @keyframes fade { from {opacity:0} to {opacity:1} }
-        #console { background: #000; color: var(--success); font-family: monospace; padding: 10px; height: 150px; overflow-y: auto; border: 1px solid #333; margin-bottom: 15px; font-size: 0.8rem; }
-        .btn-back { background: #333; color: #fff; border: none; padding: 10px 20px; border-radius: 20px; margin-bottom: 15px; }
+        .screen.active { display: block; }
+        
+        #console-output { background: #000; color: var(--success); font-family: monospace; padding: 15px; height: 150px; overflow-y: auto; border: 1px solid #333; margin-bottom: 10px; font-size: 0.9rem; }
+        .btn-back { background: transparent; border: 1px solid #555; color: #aaa; padding: 10px 20px; border-radius: 20px; margin-bottom: 20px; }
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
     </style>
 </head>
@@ -37,101 +40,115 @@
     <div class="brand">PROPART <span>MILLÁN</span></div>
     <div style="display:flex; align-items:center; gap:10px;">
         <span style="font-size:0.7rem; color:#aaa;">SYSTEM</span>
-        <div id="led" class="led"></div>
+        <div id="connection-led" class="led"></div>
     </div>
 </header>
 
 <div class="container">
-    <div id="menu" class="screen active">
+    <div id="menu-screen" class="screen active">
         <h2 style="text-align:center;">Panel de Control</h2>
-        <div class="grid">
+        <div class="dashboard-grid">
             <div class="tile connect" onclick="conectarScanner()">
                 <i class="fas fa-plug" id="icon-conn"></i>
                 <h3 id="text-conn">CONECTAR ESCÁNER</h3>
-                <small style="color:#aaa;">Bluetooth ELM327</small>
+                <div style="font-size:0.7rem; color:#aaa; margin-top:5px;">Click para iniciar</div>
             </div>
-            <div class="tile" onclick="alert('Función PRO: Base de datos')"><i class="fas fa-cogs"></i><h3>Refacciones</h3></div>
-            <div class="tile" onclick="irScanner()"><i class="fas fa-tachometer-alt"></i><h3>Ver Datos</h3></div>
+            <div class="tile" onclick="irA('parts-screen')"><i class="fas fa-cogs"></i><h3>Refacciones</h3></div>
+            <div class="tile" onclick="irA('scanner-screen')"><i class="fas fa-heartbeat"></i><h3>Diagnóstico</h3></div>
         </div>
     </div>
 
-    <div id="scanner" class="screen">
-        <button class="btn-back" onclick="irMenu()">Volver</button>
-        <h2>Diagnóstico en Vivo</h2>
-        <div id="console">Esperando conexión...<br>>_</div>
-        <div class="grid">
-            <button class="tile" onclick="enviar('0105')">TEMP MOTOR</button>
-            <button class="tile" onclick="enviar('010C')">RPM</button>
-            <button class="tile" onclick="enviar('03')">LEER CÓDIGOS</button>
-            <button class="tile" style="color:red; border-color:red" onclick="enviar('04')">BORRAR CÓDIGOS</button>
+    <div id="scanner-screen" class="screen">
+        <button class="btn-back" onclick="irA('menu-screen')">Volver</button>
+        <h2>Datos en Vivo</h2>
+        <div id="console-output">Esperando conexión...<br>>_</div>
+        <div class="dashboard-grid">
+            <button class="tile" onclick="enviarComando('0105')">Temp. Motor</button>
+            <button class="tile" onclick="enviarComando('010C')">RPM</button>
+            <button class="tile" onclick="enviarComando('03')">Leer DTC</button>
+            <button class="tile" style="border-color:red; color:red;" onclick="enviarComando('04')">Borrar DTC</button>
         </div>
+    </div>
+    
+    <div id="parts-screen" class="screen">
+        <button class="btn-back" onclick="irA('menu-screen')">Volver</button>
+        <h2>Refacciones</h2>
+        <p>Base de datos en construcción...</p>
     </div>
 </div>
 
 <script>
-    function irMenu() { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById('menu').classList.add('active'); }
-    function irScanner() { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById('scanner').classList.add('active'); }
-    function log(txt) { let c = document.getElementById('console'); c.innerHTML += "<div>" + txt + "</div>"; c.scrollTop = c.scrollHeight; }
+    function irA(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+    function log(txt) {
+        const d = document.getElementById('console-output');
+        d.innerHTML += `<div>${txt}</div>`;
+        d.scrollTop = d.scrollHeight;
+    }
 
-    let device, server, service, char;
+    // --- LÓGICA DE CONEXIÓN ROBUSTA ---
+    let device, server, service, characteristic;
 
-    // LISTA DE CANALES POSIBLES (UUIDs)
-    const servicesList = [
-        '0000fff0-0000-1000-8000-00805f9b34fb', // Estándar
-        '0000ffe0-0000-1000-8000-00805f9b34fb'  // Clones V-Link / HM-10
+    // Estos son los DOS canales posibles. Tu escáner usa el segundo (FFE0).
+    const OPTIONAL_SERVICES = [
+        '0000fff0-0000-1000-8000-00805f9b34fb', // Canal Estándar
+        '0000ffe0-0000-1000-8000-00805f9b34fb'  // Canal Alternativo (El que tú necesitas)
     ];
 
     async function conectarScanner() {
         try {
-            log("📡 Buscando dispositivos...");
+            log("📡 Buscando...");
+            
+            // 1. Buscar dispositivo
             device = await navigator.bluetooth.requestDevice({
                 acceptAllDevices: true,
-                optionalServices: servicesList // Pedimos permiso para AMBOS canales
+                optionalServices: OPTIONAL_SERVICES
             });
 
             log("Conectando a " + device.name + "...");
             server = await device.gatt.connect();
-            log("✅ Dispositivo conectado.");
-            
-            // INTENTO 1: Canal Estándar (FFF0)
+            log("✅ Conectado. Buscando canal...");
+
+            // 2. INTENTO A: Canal Estándar (FFF0)
             try {
-                log("Probando Canal 1 (FFF0)...");
                 service = await server.getPrimaryService('0000fff0-0000-1000-8000-00805f9b34fb');
-                char = await service.getCharacteristic('0000fff1-0000-1000-8000-00805f9b34fb');
-                log("¡Canal 1 Funciona!");
+                characteristic = await service.getCharacteristic('0000fff1-0000-1000-8000-00805f9b34fb');
+                log("Canal 1 (FFF0) OK");
             } catch (e) {
-                // Si falla, INTENTO 2: Canal V-Link (FFE0)
-                log("⚠️ Canal 1 falló. Probando Canal 2 (FFE0)...");
+                // 3. INTENTO B: Canal Alternativo (FFE0) - ¡AQUÍ ENTRARÁ TU ESCÁNER!
+                log("⚠️ Canal 1 falló. Probando Canal 2...");
                 service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
-                char = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-                log("¡Canal 2 Funciona!");
+                characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+                log("Canal 2 (FFE0) OK");
             }
 
-            // Si llegamos aquí, ¡YA TENEMOS CONEXIÓN REAL!
-            document.getElementById('led').classList.add('on');
+            // ÉXITO TOTAL
+            document.getElementById('connection-led').classList.add('on');
             document.getElementById('text-conn').innerText = "CONECTADO ✅";
             document.getElementById('icon-conn').className = "fas fa-link";
             log("¡SISTEMA LISTO! 🚗");
-            
-            await enviar("ATZ");
-            setTimeout(() => irScanner(), 1500);
 
-        } catch (e) {
-            log("❌ Error fatal: " + e);
-            alert("No se pudo conectar: " + e);
+            await enviarComando("ATZ");
+            setTimeout(() => irA('scanner-screen'), 1000);
+
+        } catch (error) {
+            log("❌ Error: " + error);
+            alert("No se encontró un canal compatible. Error: " + error);
         }
     }
 
-    async function enviar(cmd) {
-        if(!char) return alert("Primero conecta el escáner");
+    async function enviarComando(cmd) {
+        if (!characteristic) return alert("Conecta primero el escáner");
         try {
             let enc = new TextEncoder();
-            await char.writeValue(enc.encode(cmd + "\r"));
+            await characteristic.writeValue(enc.encode(cmd + '\r'));
             log(">> " + cmd);
-        } catch(e) { log("Error envío: " + e); }
+        } catch (e) { log("Error envío: " + e); }
     }
-
-    if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+    
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>
