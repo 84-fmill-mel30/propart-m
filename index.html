@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProPart Millán - PRO</title>
+    <title>ProPart Millán - FINAL</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     
     <style>
-        :root { --primary: #ffd700; --bg: #050505; --panel: #141414; --text: #e0e0e0; --link: #00d2ff; }
+        :root { --primary: #ffd700; --bg: #050505; --panel: #141414; --text: #e0e0e0; --pdf: #ff4444; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; user-select: none; overflow: hidden; }
         
-        header { background: linear-gradient(180deg, #1a1a1a 0%, #000 100%); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); z-index: 100; position: relative; }
+        header { background: linear-gradient(180deg, #1a1a1a 0%, #000 100%); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); }
         .brand { font-size: 1.1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #fff; }
         .brand span { color: var(--primary); }
         .led { width: 10px; height: 10px; background: #333; border-radius: 50%; border: 1px solid #555; }
@@ -20,28 +20,24 @@
 
         .container { padding: 15px; max-width: 800px; margin: 0 auto; height: calc(100vh - 60px); overflow-y: auto; padding-bottom: 80px; box-sizing: border-box; }
         
-        /* GRID */
         .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
         .tile { background: var(--panel); border: 1px solid #333; border-radius: 15px; padding: 25px 10px; text-align: center; cursor: pointer; transition: 0.2s; }
         .tile:active { transform: scale(0.96); background: #222; }
         .tile i { font-size: 2.2rem; color: var(--primary); display: block; margin-bottom: 12px; }
-        
-        /* BUSCADOR INTERNO */
-        .search-bar-container { display: flex; gap: 10px; margin-bottom: 10px; }
-        .internal-browser { width: 100%; height: 60vh; border: 1px solid #333; border-radius: 10px; background: #fff; }
-        
+
+        /* VISOR PDF */
+        .pdf-frame { width: 100%; height: 75vh; border: none; background: #222; border-radius: 8px; }
+        .pdf-item { background: #1a1a1a; border-left: 4px solid var(--pdf); padding: 15px; margin-bottom: 10px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .pdf-title { font-weight: bold; color: #fff; }
+        .pdf-icon { color: var(--pdf); font-size: 1.5rem; }
+
+        /* LOG DE CONEXIÓN (VISUAL) */
+        #status-log { color: var(--primary); font-family: monospace; font-size: 0.75rem; text-align: center; margin-top: 10px; height: 20px; }
+
         /* GRÁFICA */
         .graph-container { background: #000; border: 1px solid #333; border-radius: 10px; padding: 10px; position: relative; }
         canvas { width: 100%; height: 200px; display: block; }
         .live-val { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; font-weight: bold; color: #0f0; font-family: monospace; }
-
-        /* ITEMS CON IMAGEN */
-        .part-item { background: #1a1a1a; padding: 0; border: 1px solid #333; margin-bottom: 15px; border-radius: 10px; overflow: hidden; }
-        .part-header { padding: 15px; border-left: 4px solid var(--primary); }
-        .part-img { width: 100%; height: auto; display: block; border-top: 1px solid #333; background: #000; }
-        .part-name { font-weight: bold; font-size: 1.1rem; color: #fff; }
-        .part-num { color: #888; font-size: 0.9rem; font-family: monospace; margin-top: 4px; }
-        .part-note { color: var(--accent); font-size: 0.85rem; margin-top: 8px; display: block; line-height: 1.4; }
 
         .screen { display: none; height: 100%; }
         .screen.active { display: block; animation: fade 0.3s; }
@@ -51,6 +47,14 @@
         button.btn-action { background: var(--primary); color: #000; font-weight: 800; border: none; padding: 14px; width: 100%; border-radius: 8px; cursor: pointer; text-transform: uppercase; }
         .btn-back { background: #333; color: #fff; border: none; padding: 10px 25px; border-radius: 25px; margin-bottom: 20px; font-weight: bold; cursor: pointer; }
         #console-output { font-family: monospace; font-size: 0.7rem; color: #555; text-align: center; margin-top: 20px; }
+        
+        /* ITEMS INVENTARIO */
+        .part-item { background: #1a1a1a; padding: 0; border: 1px solid #333; margin-bottom: 15px; border-radius: 10px; overflow: hidden; }
+        .part-header { padding: 15px; border-left: 4px solid var(--primary); }
+        .part-img { width: 100%; height: auto; display: block; border-top: 1px solid #333; background: #000; }
+        .part-name { font-weight: bold; font-size: 1.1rem; color: #fff; }
+        .part-note { color: var(--accent); font-size: 0.85rem; margin-top: 8px; display: block; }
+
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
     </style>
 </head>
@@ -67,29 +71,31 @@
 <div class="container">
 
     <div id="menu-screen" class="screen active">
-        <h2 style="text-align:center; font-weight:300;">Diagnóstico Millán</h2>
+        <h2 style="text-align:center; font-weight:300;">Panel de Control</h2>
+        
+        <div id="status-log">Esperando conexión...</div>
+
         <div class="dashboard-grid">
             <div class="tile" style="grid-column:span 2; border-color:var(--primary); background: linear-gradient(45deg, #1a1a1a, #2a2a20);" onclick="conectarScanner()">
                 <i class="fas fa-plug"></i><h3>CONECTAR ESCÁNER</h3><small style="color:#aaa;">VW ISO 9141</small>
             </div>
             <div class="tile" onclick="irA('parts-screen')"><i class="fas fa-boxes"></i><h3>Inventario</h3></div>
             <div class="tile" onclick="irA('scanner-screen')"><i class="fas fa-wave-square"></i><h3>Osciloscopio</h3></div>
-            
-            <div class="tile" onclick="irA('browser-screen')"><i class="fas fa-search-location"></i><h3>Buscar Diagrama</h3></div>
+            <div class="tile" onclick="irA('library-screen')"><i class="fas fa-book"></i><h3>Manuales PDF</h3></div>
         </div>
     </div>
 
-    <div id="browser-screen" class="screen">
+    <div id="library-screen" class="screen">
         <button class="btn-back" onclick="irA('menu-screen')"> < Volver</button>
-        
-        <div class="search-bar-container">
-            <input type="text" id="search-query" placeholder="Ej: Diagrama Sensor O2 Jetta A4" style="margin-bottom:0;">
-            <button class="btn-action" style="width:auto;" onclick="buscarDiagrama()"><i class="fas fa-search"></i></button>
-        </div>
+        <h2>Biblioteca Técnica</h2>
+        <input type="text" id="search-pdf" placeholder="🔍 Buscar diagrama..." onkeyup="filtrarPDFs()">
+        <div id="pdf-list"></div>
+        <button class="btn-action" style="margin-top:20px; background:#222; color:#aaa; border:1px dashed #555;" onclick="irA('add-pdf-screen')">+ AGREGAR MANUAL</button>
+    </div>
 
-        <iframe id="diagram-frame" class="internal-browser" src="about:blank"></iframe>
-        
-        <p style="color:#555; font-size:0.7rem; text-align:center; margin-top:5px;">Resultados cargados internamente.</p>
+    <div id="pdf-viewer-screen" class="screen">
+        <button class="btn-back" onclick="irA('library-screen')"> < Cerrar</button>
+        <iframe id="pdf-frame" class="pdf-frame" src=""></iframe>
     </div>
 
     <div id="scanner-screen" class="screen">
@@ -118,37 +124,109 @@
     </div>
 
     <div id="login-screen" class="screen" style="text-align:center; padding-top:50px;">
-        <i class="fas fa-user-lock" style="font-size:4rem; color:var(--primary); margin-bottom:20px;"></i>
-        <h3>Acceso Propietario</h3><input type="password" id="admin-pass" placeholder="Código">
-        <button class="btn-action" onclick="validarAdmin()">DESBLOQUEAR</button>
+        <h3>Acceso</h3><input type="password" id="admin-pass" placeholder="Código">
+        <button class="btn-action" onclick="validarAdmin()">ENTRAR</button>
         <button class="btn-back" style="margin-top:20px; background:transparent;" onclick="irA('menu-screen')">X</button>
     </div>
-
     <div id="add-screen" class="screen">
         <button class="btn-back" onclick="irA('parts-screen')">Cancelar</button>
         <h2>Nueva Refacción</h2>
         <select id="new-brand" onchange="actualizarModelosNew()"></select>
-        <div style="display:flex; gap:10px;"><select id="new-model" style="width:50%;" onchange="verificarOtroModelo()"></select><input type="text" id="new-model-text" placeholder="Modelo/Año" style="width:50%; display:none;"></div>
-        <select id="new-system"><option value="SENSORES">SENSORES</option><option value="ENCENDIDO">ENCENDIDO</option><option value="LUCES">LUCES</option><option value="RELAYS">RELAYS</option><option value="DIAGRAMAS">DIAGRAMAS</option></select>
+        <div style="display:flex; gap:10px;"><select id="new-model" style="width:50%;" onchange="verificarOtroModelo()"></select><input type="text" id="new-model-text" placeholder="Modelo" style="width:50%; display:none;"></div>
+        <select id="new-system"><option value="SENSORES">SENSORES</option><option value="ENCENDIDO">ENCENDIDO</option><option value="LUCES">LUCES</option><option value="RELAYS">RELAYS</option></select>
         <input type="text" id="new-name" placeholder="Nombre">
-        <input type="text" id="new-part" placeholder="Num. Parte">
-        <input type="text" id="new-img" placeholder="Imagen (ej: sensor.jpg)">
+        <input type="text" id="new-part" placeholder="Parte">
+        <input type="text" id="new-img" placeholder="Imagen (ej: foto.jpg)">
         <textarea id="new-note" rows="3" placeholder="Notas"></textarea>
         <button class="btn-action" onclick="guardarProducto()">GUARDAR</button>
+    </div>
+    <div id="add-pdf-screen" class="screen">
+        <button class="btn-back" onclick="irA('library-screen')">Cancelar</button>
+        <h2>Nuevo Manual</h2>
+        <input type="text" id="pdf-name" placeholder="Nombre">
+        <input type="text" id="pdf-file" placeholder="Archivo (ej: manual.pdf)">
+        <button class="btn-action" onclick="guardarPDF()">GUARDAR</button>
     </div>
 </div>
 
 <script>
-    // --- BUSCADOR INTERNO ---
-    function buscarDiagrama() {
-        const query = document.getElementById('search-query').value;
-        if(!query) return alert("Escribe qué buscas");
-        
-        // TRUCO: Usamos Google Images Embed mode (igu=1) para que se deje meter en la App
-        const url = `https://www.google.com/search?q=${encodeURIComponent(query + " diagrama wiring diagram")}&tbm=isch&igu=1`;
-        
-        document.getElementById('diagram-frame').src = url;
+    function updateStatus(msg) { document.getElementById('status-log').innerText = msg; }
+
+    // --- BLUETOOTH VW ISO 9141 (RESTAURADO V13) ---
+    let device, server, service, char;
+    const VGATE_SERVICE = 'e7810a71-73ae-499d-8c15-faa9aef0c3f2';
+    const VGATE_CHAR = 'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f';
+    
+    async function conectarScanner() {
+        try {
+            updateStatus("📡 Buscando Bluetooth...");
+            device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [VGATE_SERVICE, '0000fff0-0000-1000-8000-00805f9b34fb', '0000ffe0-0000-1000-8000-00805f9b34fb']
+            });
+            
+            device.addEventListener('gattserverdisconnected', () => { 
+                document.getElementById('connection-led').classList.remove('on'); 
+                updateStatus("❌ Desconectado");
+                detenerGrafica(); 
+            });
+
+            server = await device.gatt.connect();
+            updateStatus("✅ Vinculado. Buscando canal...");
+
+            // INTENTO 1: VGATE
+            try { 
+                service = await server.getPrimaryService(VGATE_SERVICE); 
+                char = await service.getCharacteristic(VGATE_CHAR); 
+            } catch (e) { 
+                // INTENTO 2: GENÉRICO
+                try { 
+                    service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb'); 
+                    char = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb'); 
+                } catch(err2) { 
+                    throw "No se halló servicio OBD"; 
+                } 
+            }
+
+            await char.startNotifications();
+            char.addEventListener('characteristicvaluechanged', handleData);
+            document.getElementById('connection-led').classList.add('on');
+            updateStatus("⚡ INICIANDO PROTOCOLO VW...");
+            
+            // SECUENCIA EXACTA PARA GOLF A4
+            await enviar("AT Z", 1000);
+            await enviar("AT SP 3", 500);   // ISO 9141-2
+            await enviar("AT IIA 33", 500); // Address 33 (VW)
+            await enviar("0100", 500);      // Wake Up
+            
+            updateStatus("🚀 LISTO PARA ESCANEAR");
+            setTimeout(() => irA('scanner-screen'), 1500);
+
+        } catch (err) { 
+            updateStatus("❌ Error: " + err); 
+            alert("Error: " + err);
+        }
     }
+
+    function handleData(event) {
+        let texto = new TextDecoder('utf-8').decode(event.target.value).replace(/>/g, '').trim(); 
+        if(!texto) return;
+        let hex = texto.replace(/\s/g, ''); 
+        
+        if(hex.startsWith("410C")) {
+            let rpm = ((parseInt(hex.substring(4, 6), 16) * 256) + parseInt(hex.substring(6, 8), 16)) / 4;
+            updateGraph(Math.round(rpm));
+        } else if(hex.startsWith("4105")) {
+            let temp = parseInt(hex.substring(4, 6), 16) - 40;
+            document.getElementById('console-output').innerText = "Temp: " + temp + "°C";
+        } else if(texto.includes("V")) {
+            document.getElementById('console-output').innerText = "Volt: " + texto;
+        }
+    }
+
+    async function pedirDato(tipo) { if(tipo==='TEMP') await enviar("0105", 0); if(tipo==='VOLT') await enviar("AT RV", 0); }
+    async function enviar(cmd, wait) { if(!char) return; try { await char.writeValue(new TextEncoder().encode(cmd + "\r")); if(wait > 0) await new Promise(r => setTimeout(r, wait)); } catch(e) {} }
+    async function borrarCodigos() { if(confirm("¿Borrar Códigos?")) await enviar("04", 0); }
 
     // --- GRÁFICA ---
     let chartCtx = document.getElementById('rpmChart').getContext('2d');
@@ -170,20 +248,37 @@
     function iniciarGrafica() { if(!char) return alert("Conecta scanner"); monitoring = true; monitorInterval = setInterval(() => { enviar("010C", 0); }, 250); }
     function detenerGrafica() { monitoring = false; clearInterval(monitorInterval); }
 
-    // --- BD ---
-    const DB_DEFAULT = {
-        "VW": { "GOLF/JETTA A4": { "SENSORES": [], "ENCENDIDO": [], "RELAYS": [], "DIAGRAMAS": [] } },
-        "NISSAN": { "TSURU III": { "SENSORES": [] } },
-        "CHEVROLET": { "AVEO": {}, "CHEVY": {} },
-        "FORD": {}, "TOYOTA": {}, "HONDA": {}, "MAZDA": {}, "DODGE": {}, "JEEP": {}, "HYUNDAI": {}, "KIA": {}, "BMW": {}, "AUDI": {}, "SEAT": {}, "RENAULT": {}, "PEUGEOT": {}, "FIAT": {},
-        "UNIVERSAL": { "TALLER": { "MATERIALES": [ {name:"Cable 16",part:"Rojo",note:"Luces"}, {name:"Thermofit",part:"Negro",note:"Aislante"} ] } }
-    };
+    // --- GESTIÓN BD & PDFS ---
+    let DB_PDF = JSON.parse(localStorage.getItem('millan_pdfs')) || [];
+    const DB_DEFAULT = { "VW": { "GOLF/JETTA A4": { "SENSORES": [], "ENCENDIDO": [] } } };
     let DB_ELEC = JSON.parse(localStorage.getItem('millan_db_v5')) || DB_DEFAULT;
     let isAdmin = false;
 
-    function init() { llenarSelectBrands('sel-brand'); llenarSelectBrands('new-brand'); }
+    function init() { llenarSelectBrands('sel-brand'); llenarSelectBrands('new-brand'); cargarPDFs(); }
     function llenarSelectBrands(id) { const s=document.getElementById(id); s.innerHTML='<option value="">Marca...</option>'; Object.keys(DB_ELEC).sort().forEach(m=>s.innerHTML+=`<option value="${m}">${m}</option>`); }
-    function irA(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='add-screen') {document.getElementById('new-model-text').style.display='none'; document.getElementById('new-model').style.display='block'; actualizarModelosNew();} }
+    function irA(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='add-screen') {document.getElementById('new-model-text').style.display='none'; document.getElementById('new-model').style.display='block'; actualizarModelosNew();} if(id==='library-screen') cargarPDFs(); }
+    
+    function cargarPDFs() {
+        const div = document.getElementById('pdf-list');
+        const filter = document.getElementById('search-pdf').value.toLowerCase();
+        div.innerHTML = "";
+        DB_PDF.forEach((pdf) => {
+            if(pdf.name.toLowerCase().includes(filter)) {
+                div.innerHTML += `<div class="pdf-item" onclick="abrirPDF('${pdf.file}')"><div class="pdf-title">${pdf.name}</div><i class="fas fa-file-pdf pdf-icon"></i></div>`;
+            }
+        });
+    }
+    function filtrarPDFs() { cargarPDFs(); }
+    function guardarPDF() {
+        const name = document.getElementById('pdf-name').value;
+        const file = document.getElementById('pdf-file').value;
+        if(!name || !file) return alert("Faltan datos");
+        DB_PDF.push({ name: name, file: file });
+        localStorage.setItem('millan_pdfs', JSON.stringify(DB_PDF));
+        alert("Manual Registrado"); irA('library-screen');
+    }
+    function abrirPDF(filename) { document.getElementById('pdf-frame').src = filename; irA('pdf-viewer-screen'); }
+    
     function abrirAdmin() { if(isAdmin) alert("Admin OK"); else irA('login-screen'); }
     function validarAdmin() { if(document.getElementById('admin-pass').value==="1234") {isAdmin=true; document.getElementById('btn-add-part').style.display="block"; alert("Desbloqueado"); irA('menu-screen');} else alert("Error"); }
     function actualizarModelosNew() { const m=document.getElementById('new-brand').value; const s=document.getElementById('new-model'); s.innerHTML=""; if(DB_ELEC[m]) Object.keys(DB_ELEC[m]).forEach(x=>s.innerHTML+=`<option value="${x}">${x}</option>`); s.innerHTML+=`<option value="OTRO">CREAR NUEVO...</option>`; }
@@ -201,36 +296,13 @@
     function mostrarPiezas() { 
         const m=document.getElementById('sel-brand').value; const mod=document.getElementById('sel-model').value; const sis=document.getElementById('sel-system').value; const d=document.getElementById('parts-list'); d.innerHTML=''; 
         if(sis && DB_ELEC[m][mod][sis]) DB_ELEC[m][mod][sis].forEach(p=>{
-            let imgHTML = p.img ? `<img src="${p.img}" class="part-img" alt="Diagrama">` : '';
+            let imgHTML = p.img ? `<img src="${p.img}" class="part-img" alt="Refacción">` : '';
             d.innerHTML+=`<div class="part-item"><div class="part-header"><div class="part-name">${p.name}</div><div class="part-num">NP: ${p.part}</div><small class="part-note">${p.note}</small></div>${imgHTML}</div>`;
         }); 
     }
-
-    // --- BLUETOOTH VW ISO ---
-    let device, server, service, char;
-    const VGATE_SERVICE = 'e7810a71-73ae-499d-8c15-faa9aef0c3f2';
-    const VGATE_CHAR = 'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f';
-    async function conectarScanner() {
-        try {
-            log("Conectando...");
-            device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [VGATE_SERVICE, '0000fff0-0000-1000-8000-00805f9b34fb', '0000ffe0-0000-1000-8000-00805f9b34fb'] });
-            device.addEventListener('gattserverdisconnected', () => { document.getElementById('connection-led').classList.remove('on'); detenerGrafica(); });
-            server = await device.gatt.connect();
-            try { service = await server.getPrimaryService(VGATE_SERVICE); char = await service.getCharacteristic(VGATE_CHAR); } catch (e) { try { service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb'); char = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb'); } catch(err2) { throw "Error"; } }
-            await char.startNotifications(); char.addEventListener('characteristicvaluechanged', handleData);
-            document.getElementById('connection-led').classList.add('on');
-            await enviar("AT Z", 1000); await enviar("AT SP 3", 500); await enviar("AT IIA 33", 500); await enviar("0100", 500);
-            setTimeout(() => irA('scanner-screen'), 1500);
-        } catch (err) { alert("Error: " + err); }
-    }
-    function handleData(event) {
-        let texto = new TextDecoder('utf-8').decode(event.target.value).replace(/>/g, '').trim(); if(!texto) return;
-        let hex = texto.replace(/\s/g, ''); 
-        if(hex.startsWith("410C")) updateGraph(Math.round(((parseInt(hex.substring(4, 6), 16) * 256) + parseInt(hex.substring(6, 8), 16)) / 4));
-        else if(hex.startsWith("4105")) log((parseInt(hex.substring(4, 6), 16) - 40) + "°C");
-        else if(texto.includes("V")) log(texto);
-    }
-    async function pedirDato(tipo) { if(tipo==='TEMP') await enviar("0105", 0); if(tipo==='VOLT') await enviar("AT RV", 0); }
-    async function enviar(cmd, wait) { if(!char) return; try { await char.writeValue(new TextEncoder().encode(cmd + "\r")); if(wait > 0) await new Promise(r => setTimeout(r, wait)); } catch(e) {} }
-    async function borrarCodigos() { if(confirm("¿Borrar Códigos?")) await enviar("04", 0); }
-    function log(t) { document.getElementById('console-output').
+    
+    init();
+    if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
