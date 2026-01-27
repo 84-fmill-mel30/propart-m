@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProPart Millán - DIAGNOSTICO</title>
+    <title>ProPart Millán - ULTIMATE</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     
     <style>
-        :root { --primary: #ffd700; --bg: #050505; --panel: #141414; --text: #e0e0e0; --accent: #00ff00; --danger: #ff4444; }
+        :root { --primary: #ffd700; --bg: #050505; --panel: #141414; --text: #e0e0e0; --accent: #00ff00; --danger: #ff4444; --info: #00d2ff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; user-select: none; overflow: hidden; }
         
         header { background: linear-gradient(180deg, #1a1a1a 0%, #000 100%); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); }
@@ -20,6 +20,7 @@
 
         .container { padding: 15px; max-width: 800px; margin: 0 auto; height: calc(100vh - 60px); overflow-y: auto; padding-bottom: 80px; box-sizing: border-box; }
         
+        /* GRID MENÚ */
         .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
         .tile { background: var(--panel); border: 1px solid #333; border-radius: 12px; padding: 20px 10px; text-align: center; cursor: pointer; transition: 0.1s; position: relative; }
         .tile:active { transform: scale(0.98); background: #222; border-color: var(--primary); }
@@ -38,17 +39,25 @@
         .live-val { position: absolute; top: 10px; right: 15px; font-size: 2rem; font-weight: bold; color: var(--accent); font-family: monospace; text-shadow: 0 0 10px rgba(0,255,0,0.4); }
         .live-label { position: absolute; top: 10px; left: 15px; font-size: 0.8rem; color: #aaa; text-transform: uppercase; font-weight: bold; }
 
-        /* CAJA DE CÓDIGOS DE FALLA */
-        .codes-box { background: #111; border: 1px dashed #444; padding: 15px; min-height: 100px; margin-bottom: 20px; border-radius: 8px; font-family: monospace; color: var(--primary); font-size: 1.2rem; white-space: pre-wrap; text-align: center; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        /* ESTILO GUÍA DE PRUEBA (PINOUTS) */
+        .sensor-card { background: #1a1a1a; border-radius: 10px; padding: 15px; margin-bottom: 20px; border-left: 5px solid var(--info); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .sensor-title { color: #fff; font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .connector-view { background: #000; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px dashed #555; }
+        .wire-line { display: flex; align-items: center; margin-bottom: 8px; font-family: monospace; font-size: 0.85rem; color: #ddd; }
+        .wire-color { width: 30px; height: 8px; border-radius: 4px; margin-right: 10px; border: 1px solid #555; }
+        .tech-data { background: #222; padding: 10px; border-radius: 6px; font-size: 0.8rem; line-height: 1.4; color: #ccc; }
+        .tech-data b { color: var(--primary); }
 
-        #console-output { font-family: monospace; font-size: 0.7rem; color: #666; text-align: center; margin-top: 10px; height: 30px; overflow: hidden; }
+        /* CAJA DE CÓDIGOS */
+        .codes-box { background: #111; border: 1px dashed #444; padding: 15px; min-height: 100px; margin-bottom: 20px; border-radius: 8px; font-family: monospace; color: var(--primary); font-size: 1.1rem; white-space: pre-wrap; text-align: center; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+
+        #console-output { font-family: monospace; font-size: 0.7rem; color: #666; text-align: center; margin-top: 10px; height: 20px; overflow: hidden; }
 
         .screen { display: none; height: 100%; }
         .screen.active { display: block; animation: fade 0.3s; }
         @keyframes fade { from {opacity:0} to {opacity:1} }
         
         button.btn-back { background: #333; color: #fff; border: none; padding: 10px 25px; border-radius: 20px; margin-bottom: 15px; font-weight: bold; cursor: pointer; }
-        
         .part-item { background: #1a1a1a; padding: 15px; border-left: 4px solid var(--primary); margin-bottom: 10px; border-radius: 6px; }
         select, input { width: 100%; padding: 12px; margin-bottom: 10px; background: #222; border: 1px solid #444; color: #fff; border-radius: 6px; }
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
@@ -67,7 +76,7 @@
 <div class="container">
 
     <div id="menu-screen" class="screen active">
-        <h2 style="text-align:center; font-weight:300;">Diagnóstico Millán</h2>
+        <h2 style="text-align:center; font-weight:300;">Diagnóstico Integral</h2>
         
         <div class="proto-switch">
             <div id="proto-vw" class="proto-opt selected" onclick="setProtocol('VW')">VW GOLF A4</div>
@@ -80,32 +89,62 @@
             </div>
             
             <div class="tile" onclick="irA('codes-screen')"><i class="fas fa-clipboard-list"></i><h3>Códigos Falla</h3></div>
-            <div class="tile" onclick="irA('sensors-screen')"><i class="fas fa-chart-line"></i><h3>Sensores Vivo</h3></div>
+            <div class="tile" onclick="irA('sensors-screen')"><i class="fas fa-chart-line"></i><h3>Scanner Vivo</h3></div>
+            <div class="tile" onclick="irA('guide-screen')"><i class="fas fa-book-medical"></i><h3>Cómo Medir</h3></div>
             <div class="tile" onclick="irA('parts-screen')"><i class="fas fa-boxes"></i><h3>Inventario</h3></div>
-            <div class="tile" onclick="irA('library-screen')"><i class="fas fa-book"></i><h3>Diagramas</h3></div>
         </div>
         <div id="console-output">Listo.</div>
     </div>
 
-    <div id="codes-screen" class="screen">
+    <div id="guide-screen" class="screen">
         <button class="btn-back" onclick="irA('menu-screen')"> < Volver</button>
-        
-        <h3>Resultados del Escaneo:</h3>
-        <div id="dtc-display" class="codes-box">
-            Sin datos.<br>Presiona "LEER CÓDIGOS"
+        <h2>Guía de Pruebas (Pinouts)</h2>
+
+        <div class="sensor-card">
+            <div class="sensor-title">Cuerpo Aceleración (TPS) <i class="fas fa-bullseye"></i></div>
+            <div class="connector-view">
+                <div class="wire-line"><div class="wire-color" style="background:#800080;"></div> PIN 1: +5V (Alimentación)</div>
+                <div class="wire-line"><div class="wire-color" style="background:#8b4513;"></div> PIN 2: Tierra (Masa)</div>
+                <div class="wire-line"><div class="wire-color" style="background:#ffff00;"></div> PIN 4: Señal TPS 1 (0.5V - 4.5V)</div>
+                <div class="wire-line"><div class="wire-color" style="background:#fff;"></div> PIN 6: Señal TPS 2 (4.5V - 0.5V)</div>
+                <div class="wire-line"><div class="wire-color" style="background:#555;"></div> PIN 3/5: Motor TAC (Control)</div>
+            </div>
+            <div class="tech-data">
+                <b>Prueba Rápida:</b><br>
+                1. Switch ON. Medir Pin 1 y 2 = 5V.<br>
+                2. Medir Pin 4 mientras alguien pisa pedal. Debe subir voltaje sin cortes.<br>
+                3. TPS 1 y TPS 2 son inversos.
+            </div>
         </div>
 
-        <div class="dashboard-grid">
-            <div class="tile" style="border-color:#0f0;" onclick="leerCodigos()">
-                <i class="fas fa-search" style="color:#0f0;"></i>
-                <h3>LEER CÓDIGOS</h3>
+        <div class="sensor-card">
+            <div class="sensor-title">Pedal (APP) <i class="fas fa-shoe-prints"></i></div>
+            <div class="connector-view">
+                <div class="wire-line"><div class="wire-color" style="background:#bbb;"></div> PIN 1: +5V (APP 1)</div>
+                <div class="wire-line"><div class="wire-color" style="background:#8b4513;"></div> PIN 5: Tierra (APP 1)</div>
+                <div class="wire-line"><div class="wire-color" style="background:#00ff00;"></div> PIN 4: SEÑAL APP 1 (0-5V)</div>
+                <div class="wire-line"><div class="wire-color" style="background:#bbb;"></div> PIN 2: +5V (APP 2)</div>
+                <div class="wire-line"><div class="wire-color" style="background:#0000ff;"></div> PIN 6: SEÑAL APP 2 (0-2.5V)</div>
             </div>
-            <div class="tile" style="border-color:#ff4444;" onclick="borrarCodigos()">
-                <i class="fas fa-trash-alt" style="color:#ff4444;"></i>
-                <h3>BORRAR FALLAS</h3>
+            <div class="tech-data">
+                <b>OJO:</b> La señal 2 siempre es la mitad de la señal 1.<br>
+                Si APP1 = 2V, APP2 debe ser 1V.<br>
+                Si no coinciden = EPC prendido.
             </div>
         </div>
-        <p style="color:#666; font-size:0.8rem; text-align:center;">*Para borrar: Switch ON, Motor OFF.</p>
+
+        <div class="sensor-card">
+            <div class="sensor-title">Sensor RPM (CKP) <i class="fas fa-tachometer-alt"></i></div>
+            <div class="connector-view">
+                <div class="wire-line"><div class="wire-color" style="background:#fff;"></div> PIN 1: Señal (+)</div>
+                <div class="wire-line"><div class="wire-color" style="background:#000;"></div> PIN 2: Señal (-)</div>
+                <div class="wire-line"><div class="wire-color" style="background:#555;"></div> PIN 3: Malla (Blindaje)</div>
+            </div>
+            <div class="tech-data">
+                <b>Resistencia:</b> 730 a 1000 Ohms entre pin 1 y 2.<br>
+                Si marca infinito (OL) = Bobina abierta (Cambiar).
+            </div>
+        </div>
     </div>
 
     <div id="sensors-screen" class="screen">
@@ -121,11 +160,19 @@
             <div class="tile" id="btn-rpm" onclick="monitorear('RPM')"><i class="fas fa-tachometer-alt"></i><h3>RPM</h3></div>
             <div class="tile" id="btn-tps" onclick="monitorear('TPS')"><i class="fas fa-bullseye"></i><h3>TPS</h3></div>
             <div class="tile" id="btn-maf" onclick="monitorear('MAF')"><i class="fas fa-wind"></i><h3>MAF</h3></div>
-            
             <div class="tile" id="btn-app1" onclick="monitorear('APP1')"><i class="fas fa-shoe-prints"></i><h3>APP 1</h3></div>
             <div class="tile" id="btn-app2" onclick="monitorear('APP2')"><i class="fas fa-shoe-prints"></i><h3>APP 2</h3></div>
-            
             <div class="tile" id="btn-volt" onclick="monitorear('VOLT')"><i class="fas fa-bolt"></i><h3>VOLT</h3></div>
+        </div>
+    </div>
+
+    <div id="codes-screen" class="screen">
+        <button class="btn-back" onclick="irA('menu-screen')"> < Volver</button>
+        <h3>Códigos DTC:</h3>
+        <div id="dtc-display" class="codes-box">Sin datos.</div>
+        <div class="dashboard-grid">
+            <div class="tile" style="border-color:#0f0;" onclick="leerCodigos()"><i class="fas fa-search" style="color:#0f0;"></i><h3>LEER</h3></div>
+            <div class="tile" style="border-color:#ff4444;" onclick="borrarCodigos()"><i class="fas fa-trash-alt" style="color:#ff4444;"></i><h3>BORRAR</h3></div>
         </div>
     </div>
 
@@ -144,7 +191,7 @@
 </div>
 
 <script>
-    // --- PROTOCOLO ---
+    // --- LÓGICA DE PROTOCOLO ---
     let currentProtocol = 'VW'; 
     function setProtocol(type) {
         currentProtocol = type;
@@ -232,93 +279,4 @@
         if(!texto || texto.length < 2 || texto.includes("NODATA")) return;
         let hex = texto.replace(/\s/g, ''); 
         
-        // LEER CÓDIGOS DE FALLA (RESPUESTA 43)
-        if(hex.startsWith("43")) {
-            let dtcText = "";
-            // Ejemplo: 43 01 02 03 00 -> P0102, P0300
-            for(let i=2; i<hex.length; i+=4) {
-                let code = hex.substr(i, 4);
-                if(code.length === 4 && code !== "0000") {
-                    let type = "P"; // Asumimos Powertrain por simplicidad genérica
-                    // Lógica real de primer nibble (0=P0, 1=P1, etc) simplificada:
-                    dtcText += type + code + "\n"; 
-                }
-            }
-            if(dtcText === "") dtcText = "No se encontraron códigos.";
-            document.getElementById('dtc-display').innerText = dtcText;
-        }
-
-        // DATOS EN VIVO
-        let val = 0;
-        let txtVal = "--";
-
-        if(activeSensor === 'RPM' && hex.includes("410C")) {
-             let idx = hex.indexOf("410C"); if(hex.length >= idx+8) val = ((parseInt(hex.substr(idx+4,2),16)*256)+parseInt(hex.substr(idx+6,2),16))/4;
-             txtVal = Math.round(val) + " RPM";
-        }
-        else if(activeSensor === 'TPS' && hex.includes("4111")) {
-            let idx = hex.indexOf("4111"); if(hex.length >= idx+6) val = (parseInt(hex.substr(idx+4,2),16)*100)/255;
-            txtVal = Math.round(val) + " %";
-        }
-        else if(activeSensor === 'APP1' && hex.includes("4149")) { // APP D
-            let idx = hex.indexOf("4149"); if(hex.length >= idx+6) val = (parseInt(hex.substr(idx+4,2),16)*100)/255;
-            txtVal = Math.round(val) + " %";
-        }
-        else if(activeSensor === 'APP2' && hex.includes("414A")) { // APP E
-            let idx = hex.indexOf("414A"); if(hex.length >= idx+6) val = (parseInt(hex.substr(idx+4,2),16)*100)/255;
-            txtVal = Math.round(val) + " %";
-        }
-        else if(activeSensor === 'MAF' && hex.includes("4110")) {
-            let idx = hex.indexOf("4110"); if(hex.length >= idx+8) val = ((parseInt(hex.substr(idx+4,2),16)*256)+parseInt(hex.substr(idx+6,2),16))/100;
-            txtVal = val.toFixed(1) + " g/s";
-        }
-        else if(activeSensor === 'VOLT' && texto.includes("V")) {
-            val = parseFloat(texto);
-            txtVal = val + " V";
-        }
-
-        if(txtVal !== "--") {
-            document.getElementById('sensor-val').innerText = txtVal;
-            dataHistory.push(val); dataHistory.shift(); drawChart();
-        }
-    }
-
-    async function pedirDato(tipo) {
-        if(tipo === 'RPM') await enviar("010C", 0);
-        else if(tipo === 'TPS') await enviar("0111", 0);
-        else if(tipo === 'APP1') await enviar("0149", 0); 
-        else if(tipo === 'APP2') await enviar("014A", 0); 
-        else if(tipo === 'MAF') await enviar("0110", 0);
-        else if(tipo === 'VOLT') await enviar("AT RV", 0);
-    }
-    
-    // COMANDO PARA LEER CÓDIGOS
-    async function leerCodigos() {
-        if(!char) return alert("Conecta scanner");
-        document.getElementById('dtc-display').innerText = "Escaneando...";
-        await enviar("03", 0);
-    }
-
-    let isBusy = false;
-    async function enviar(cmd, wait) {
-        if(!char || isBusy) return;
-        try { 
-            isBusy = true;
-            await char.writeValue(new TextEncoder().encode(cmd + "\r")); 
-            if(wait > 0) await new Promise(r => setTimeout(r, wait));
-            isBusy = false;
-        } catch(e) { isBusy = false; }
-    }
-    async function borrarCodigos() { if(confirm("¿Seguro?")) { await enviar("04", 0); alert("Orden de borrado enviada"); } }
-    function irA(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='parts-screen') init(); }
-    
-    // BD BASIC
-    let DB_ELEC = JSON.parse(localStorage.getItem('millan_db_v5')) || { "VW": { "GOLF A4": {} } };
-    function init() { let s=document.getElementById('sel-brand'); s.innerHTML='<option>Marca</option>'; Object.keys(DB_ELEC).forEach(m=>s.innerHTML+=`<option>${m}</option>`); }
-    function cargarModelos(){ let m=document.getElementById('sel-brand').value; let s=document.getElementById('sel-model'); s.innerHTML=""; s.disabled=false; Object.keys(DB_ELEC[m]).forEach(x=>s.innerHTML+=`<option>${x}</option>`); }
-    function cargarSistemas(){ document.getElementById('sel-system').disabled=false; document.getElementById('sel-system').innerHTML='<option>SENSORES</option>'; }
-    function mostrarPiezas(){ document.getElementById('parts-list').innerHTML = ""; }
-    init();
-</script>
-</body>
-</html>
+        // LEER
