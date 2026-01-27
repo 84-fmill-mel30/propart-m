@@ -275,7 +275,7 @@
         });
     }
 
-    // --- BLUETOOTH CON RESPUESTA (MODO ESCUCHA) ---
+    // --- BLUETOOTH CON PROTOCOLO AUTOMÁTICO ---
     let device, server, service, char;
     const VGATE_SERVICE = 'e7810a71-73ae-499d-8c15-faa9aef0c3f2';
     const VGATE_CHAR = 'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f';
@@ -288,7 +288,7 @@
                 optionalServices: [VGATE_SERVICE, '0000fff0-0000-1000-8000-00805f9b34fb', '0000ffe0-0000-1000-8000-00805f9b34fb']
             });
             device.addEventListener('gattserverdisconnected', () => {
-                log("⚠️ Desconectado. Reconectar.");
+                log("⚠️ Desconectado.");
                 document.getElementById('connection-led').classList.remove('on');
             });
 
@@ -299,24 +299,31 @@
             try {
                 service = await server.getPrimaryService(VGATE_SERVICE);
                 char = await service.getCharacteristic(VGATE_CHAR);
-                log("V-Link Protocol Activo");
+                log("V-Link Activo");
             } catch (e) {
                 try {
                     service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
                     char = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-                    log("Standard Protocol Activo");
+                    log("Genérico Activo");
                 } catch(err2) { throw "Sin datos"; }
             }
 
-            // ACTIVAR OIDOS (NOTIFICACIONES)
+            // ACTIVAR OIDOS
             await char.startNotifications();
             char.addEventListener('characteristicvaluechanged', handleData);
             
             document.getElementById('connection-led').classList.add('on');
             document.getElementById('text-conn').innerText = "CONECTADO";
             
-            await enviarComando("ATZ");
-            setTimeout(() => irA('scanner-screen'), 1000);
+            // --- INICIALIZACIÓN FUERTE (PARA GOLF A4) ---
+            log("Iniciando protocolos...");
+            await enviarComando("AT Z");     // Reset
+            await delay(500);
+            await enviarComando("AT SP 0");  // Protocolo Automático
+            await delay(500);
+            await enviarComando("0100");     // Despertar ECU
+            
+            setTimeout(() => irA('scanner-screen'), 2000);
 
         } catch (err) { log("Error: " + err); }
     }
@@ -324,12 +331,12 @@
     function handleData(event) {
         let value = event.target.value;
         let decoder = new TextDecoder('utf-8');
-        let texto = decoder.decode(value).replace(/>/g, '').trim(); // Limpiar respuesta
+        let texto = decoder.decode(value).replace(/>/g, '').trim(); 
         if(texto) log("<span style='color:#fff'>R: " + texto + "</span>");
     }
 
     async function enviarComando(cmd) {
-        if(!char) return log("No conectado (Usa el botón de conectar)");
+        if(!char) return log("Desconectado");
         try {
             let enc = new TextEncoder();
             await char.writeValue(enc.encode(cmd + "\r"));
@@ -338,12 +345,14 @@
     }
 
     async function borrarCodigos() {
-        if(confirm("¿Borrar Códigos? (Motor debe estar apagado, switch ON)")) {
+        if(confirm("¿Borrar Códigos? (Switch ON, Motor OFF)")) {
             await enviarComando("04");
         }
     }
     
+    function delay(ms) { return new Promise(res => setTimeout(res, ms)); }
     function log(t) { const c=document.getElementById('console-output'); c.innerHTML+=`<div>${t}</div>`; c.scrollTop=c.scrollHeight;}
+    
     init();
     if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
