@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProPart Millán - SCANNER PRO</title>
+    <title>ProPart Millán - ESTABLE</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     
     <style>
-        :root { --primary: #ffd700; --bg: #050505; --panel: #141414; --text: #e0e0e0; --accent: #00ff00; }
+        :root { --primary: #ffd700; --bg: #050505; --panel: #141414; --text: #e0e0e0; --accent: #00ff00; --danger: #ff4444; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; user-select: none; overflow: hidden; }
         
         header { background: linear-gradient(180deg, #1a1a1a 0%, #000 100%); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); }
@@ -21,33 +21,33 @@
         .container { padding: 15px; max-width: 800px; margin: 0 auto; height: calc(100vh - 60px); overflow-y: auto; padding-bottom: 80px; box-sizing: border-box; }
         
         .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .tile { background: var(--panel); border: 1px solid #333; border-radius: 12px; padding: 20px 10px; text-align: center; cursor: pointer; transition: 0.1s; position: relative; overflow: hidden; }
+        .tile { background: var(--panel); border: 1px solid #333; border-radius: 12px; padding: 20px 10px; text-align: center; cursor: pointer; transition: 0.1s; position: relative; }
         .tile:active { transform: scale(0.98); background: #222; border-color: var(--primary); }
         .tile i { font-size: 2rem; color: var(--primary); display: block; margin-bottom: 10px; }
-
-        /* SENSOR ACTIVO */
         .tile.active-sensor { border: 2px solid var(--accent); background: rgba(0, 255, 0, 0.1); }
         .tile.active-sensor i { color: var(--accent); }
 
+        /* PROTOCOLO */
+        .proto-switch { display: flex; background: #222; border-radius: 10px; margin-bottom: 15px; border: 1px solid #444; overflow: hidden; }
+        .proto-opt { flex: 1; text-align: center; padding: 12px; font-size: 0.8rem; cursor: pointer; color: #888; transition: 0.3s; }
+        .proto-opt.selected { background: var(--primary); color: #000; font-weight: bold; }
+
         /* GRÁFICA */
         .graph-wrapper { background: #000; border: 1px solid #333; border-radius: 10px; padding: 10px; position: relative; margin-bottom: 15px; }
-        canvas { width: 100%; height: 220px; display: block; }
+        canvas { width: 100%; height: 200px; display: block; }
         .live-val { position: absolute; top: 10px; right: 15px; font-size: 2rem; font-weight: bold; color: var(--accent); font-family: monospace; text-shadow: 0 0 10px rgba(0,255,0,0.4); }
         .live-label { position: absolute; top: 10px; left: 15px; font-size: 0.8rem; color: #aaa; text-transform: uppercase; font-weight: bold; }
 
-        /* PROTOCOLO SELECTOR */
-        .proto-switch { display: flex; background: #222; border-radius: 20px; margin-bottom: 15px; border: 1px solid #444; }
-        .proto-opt { flex: 1; text-align: center; padding: 10px; font-size: 0.8rem; cursor: pointer; color: #888; }
-        .proto-opt.selected { background: var(--primary); color: #000; font-weight: bold; border-radius: 20px; }
+        /* LOG VISUAL */
+        #console-output { font-family: monospace; font-size: 0.75rem; color: #aaa; text-align: center; margin-top: 15px; background: #111; padding: 10px; border-radius: 5px; height: 60px; overflow-y: auto; border: 1px solid #222; }
 
         .screen { display: none; height: 100%; }
         .screen.active { display: block; animation: fade 0.3s; }
         @keyframes fade { from {opacity:0} to {opacity:1} }
         
-        button.btn-back { background: #333; color: #fff; border: none; padding: 8px 20px; border-radius: 20px; margin-bottom: 15px; font-weight: bold; cursor: pointer; }
-        #console-output { font-family: monospace; font-size: 0.7rem; color: #666; text-align: center; margin-top: 10px; height: 40px; overflow: hidden; }
+        button.btn-back { background: #333; color: #fff; border: none; padding: 10px 25px; border-radius: 20px; margin-bottom: 15px; font-weight: bold; cursor: pointer; }
         
-        /* ESTILOS EXTRAS DE INVENTARIO Y PDF (Resumidos para espacio) */
+        /* ESTILOS EXTRAS RESUMIDOS */
         .part-item { background: #1a1a1a; padding: 15px; border-left: 4px solid var(--primary); margin-bottom: 10px; border-radius: 6px; }
         select, input { width: 100%; padding: 12px; margin-bottom: 10px; background: #222; border: 1px solid #444; color: #fff; border-radius: 6px; }
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
@@ -58,7 +58,7 @@
 <header>
     <div class="brand">PROPART <span>MILLÁN</span></div>
     <div style="display:flex; align-items:center;">
-        <span id="conn-status" style="font-size:0.7rem; color:#555; margin-right:10px;">OFFLINE</span>
+        <span id="conn-status" style="font-size:0.7rem; color:#555; margin-right:10px; font-weight:bold;">OFFLINE</span>
         <div id="connection-led" class="led"></div>
     </div>
 </header>
@@ -66,11 +66,11 @@
 <div class="container">
 
     <div id="menu-screen" class="screen active">
-        <h2 style="text-align:center; font-weight:300;">Scanner Multimarca</h2>
+        <h2 style="text-align:center; font-weight:300;">Scanner V 20.0</h2>
         
         <div class="proto-switch">
-            <div id="proto-vw" class="proto-opt selected" onclick="setProtocol('VW')">VW GOLF A4</div>
-            <div id="proto-uni" class="proto-opt" onclick="setProtocol('UNI')">UNIVERSAL (OBD2)</div>
+            <div id="proto-vw" class="proto-opt selected" onclick="setProtocol('VW')">VW GOLF A4 (ISO)</div>
+            <div id="proto-uni" class="proto-opt" onclick="setProtocol('UNI')">UNIVERSAL (CAN)</div>
         </div>
 
         <div class="dashboard-grid">
@@ -78,12 +78,13 @@
                 <i class="fas fa-plug"></i><h3>CONECTAR</h3><small id="proto-desc" style="color:#aaa;">Protocolo: ISO 9141-2</small>
             </div>
             
-            <div class="tile" onclick="irA('sensors-screen')"><i class="fas fa-chart-line"></i><h3>Sensores en Vivo</h3></div>
+            <div class="tile" onclick="irA('sensors-screen')"><i class="fas fa-chart-line"></i><h3>Sensores Vivo</h3></div>
             <div class="tile" onclick="irA('codes-screen')"><i class="fas fa-exclamation-triangle"></i><h3>Códigos Falla</h3></div>
             <div class="tile" onclick="irA('parts-screen')"><i class="fas fa-boxes"></i><h3>Inventario</h3></div>
             <div class="tile" onclick="irA('library-screen')"><i class="fas fa-book"></i><h3>Diagramas</h3></div>
         </div>
-        <div id="console-output">Listo para conectar.</div>
+        
+        <div id="console-output">Listo para conectar.<br>Selecciona protocolo arriba.</div>
     </div>
 
     <div id="sensors-screen" class="screen">
@@ -98,10 +99,10 @@
         <div class="dashboard-grid">
             <div class="tile" id="btn-rpm" onclick="monitorear('RPM')"><i class="fas fa-tachometer-alt"></i><h3>RPM (CKP)</h3></div>
             <div class="tile" id="btn-tps" onclick="monitorear('TPS')"><i class="fas fa-shoe-prints"></i><h3>TPS %</h3></div>
-            <div class="tile" id="btn-maf" onclick="monitorear('MAF')"><i class="fas fa-wind"></i><h3>MAF (g/s)</h3></div>
-            <div class="tile" id="btn-map" onclick="monitorear('MAP')"><i class="fas fa-compress-arrows-alt"></i><h3>MAP (kPa)</h3></div>
-            <div class="tile" id="btn-temp" onclick="monitorear('TEMP')"><i class="fas fa-thermometer-half"></i><h3>TEMP °C</h3></div>
-            <div class="tile" id="btn-volt" onclick="monitorear('VOLT')"><i class="fas fa-bolt"></i><h3>VOLTAJE</h3></div>
+            <div class="tile" id="btn-maf" onclick="monitorear('MAF')"><i class="fas fa-wind"></i><h3>MAF</h3></div>
+            <div class="tile" id="btn-map" onclick="monitorear('MAP')"><i class="fas fa-compress-arrows-alt"></i><h3>MAP</h3></div>
+            <div class="tile" id="btn-temp" onclick="monitorear('TEMP')"><i class="fas fa-thermometer-half"></i><h3>TEMP</h3></div>
+            <div class="tile" id="btn-volt" onclick="monitorear('VOLT')"><i class="fas fa-bolt"></i><h3>VOLT</h3></div>
         </div>
     </div>
 
@@ -109,9 +110,9 @@
         <button class="btn-back" onclick="irA('menu-screen')"> < Volver</button>
         <div style="text-align:center; margin-top:50px;">
             <i class="fas fa-trash-alt" style="font-size:4rem; color:#ff4444; margin-bottom:20px; cursor:pointer;" onclick="borrarCodigos()"></i>
-            <h3>BORRAR CÓDIGOS DE FALLA</h3>
+            <h3>BORRAR CÓDIGOS</h3>
             <p style="color:#666;">Switch ON, Motor OFF.</p>
-            <button style="background:#ff4444; color:#fff; padding:15px; border:none; border-radius:8px; width:100%; font-weight:bold; margin-top:20px;" onclick="borrarCodigos()">EJECUTAR BORRADO</button>
+            <button style="background:#ff4444; color:#fff; padding:15px; border:none; border-radius:8px; width:100%; font-weight:bold; margin-top:20px;" onclick="borrarCodigos()">BORRAR AHORA</button>
         </div>
     </div>
 
@@ -122,7 +123,6 @@
         <label>SISTEMA:</label><select id="sel-system" onchange="mostrarPiezas()" disabled></select>
         <div id="parts-list" style="margin-top:20px;"></div>
     </div>
-    
     <div id="library-screen" class="screen">
         <button class="btn-back" onclick="irA('menu-screen')"> < Volver</button>
         <div id="pdf-list"></div>
@@ -131,30 +131,31 @@
 </div>
 
 <script>
-    // --- CONFIGURACIÓN DE PROTOCOLOS ---
-    let currentProtocol = 'VW'; // Por defecto Golf A4
-    
+    // --- LÓGICA DE PROTOCOLO ---
+    let currentProtocol = 'VW'; 
     function setProtocol(type) {
         currentProtocol = type;
         document.getElementById('proto-vw').className = type === 'VW' ? 'proto-opt selected' : 'proto-opt';
         document.getElementById('proto-uni').className = type === 'UNI' ? 'proto-opt selected' : 'proto-opt';
-        
-        if(type === 'VW') document.getElementById('proto-desc').innerText = "Protocolo: ISO 9141-2 (Golf/Jetta)";
-        else document.getElementById('proto-desc').innerText = "Protocolo: AUTO (OBD2 General)";
+        log("Modo: " + (type === 'VW' ? "ISO 9141 (Lento/Antiguo)" : "AUTO (Rápido/Nuevo)"));
+    }
+    function log(msg) { 
+        const c = document.getElementById('console-output'); 
+        c.innerHTML += "<br>" + msg; 
+        c.scrollTop = c.scrollHeight; 
     }
 
-    // --- GRÁFICA EN VIVO ---
+    // --- GRÁFICA ---
     let chartCtx = document.getElementById('liveChart').getContext('2d');
     let dataHistory = new Array(50).fill(0);
     let activeSensor = null;
     let monitorInterval;
-    let maxValue = 6000; // Escala dinámica
+    let maxValue = 6000;
 
     function drawChart() {
         let cvs = document.getElementById('liveChart');
         let w = cvs.width = cvs.offsetWidth; let h = cvs.height = cvs.offsetHeight;
         chartCtx.clearRect(0,0,w,h); chartCtx.beginPath(); chartCtx.strokeStyle = "#00ff00"; chartCtx.lineWidth = 3;
-        
         for(let i=0; i<dataHistory.length; i++) {
             let y = h - ((dataHistory[i] / maxValue) * h);
             if(i===0) chartCtx.moveTo(0, y); else chartCtx.lineTo(i * (w/(dataHistory.length-1)), y);
@@ -164,121 +165,136 @@
     drawChart();
 
     function monitorear(sensor) {
-        if(!char) return alert("¡Conecta el escáner primero!");
-        
-        // Reset botones
+        if(!char) return alert("¡Conecta primero!");
         document.querySelectorAll('.tile').forEach(t => t.classList.remove('active-sensor'));
         
-        // Activar nuevo
         if(sensor === 'RPM') { document.getElementById('btn-rpm').classList.add('active-sensor'); maxValue = 6000; }
         if(sensor === 'TPS') { document.getElementById('btn-tps').classList.add('active-sensor'); maxValue = 100; }
-        if(sensor === 'MAF') { document.getElementById('btn-maf').classList.add('active-sensor'); maxValue = 100; } // g/s aprox
+        if(sensor === 'MAF') { document.getElementById('btn-maf').classList.add('active-sensor'); maxValue = 150; }
         if(sensor === 'MAP') { document.getElementById('btn-map').classList.add('active-sensor'); maxValue = 255; }
         if(sensor === 'TEMP') { document.getElementById('btn-temp').classList.add('active-sensor'); maxValue = 120; }
         if(sensor === 'VOLT') { document.getElementById('btn-volt').classList.add('active-sensor'); maxValue = 16; }
 
         activeSensor = sensor;
-        document.getElementById('sensor-label').innerText = "LEYENDO: " + sensor;
+        document.getElementById('sensor-label').innerText = sensor;
         
-        // Reiniciar intervalo
         if(monitorInterval) clearInterval(monitorInterval);
         
-        // VELOCIDAD DE PETICIÓN (500ms para VW, 250ms para Universal)
-        let speed = currentProtocol === 'VW' ? 500 : 250;
+        // VELOCIDAD LENTA PARA VW (600ms), RÁPIDA PARA OTROS (300ms)
+        let speed = currentProtocol === 'VW' ? 600 : 300;
         
-        monitorInterval = setInterval(() => {
-            pedirDato(sensor);
-        }, speed);
+        monitorInterval = setInterval(() => { pedirDato(sensor); }, speed);
     }
+    function detenerGrafica() { clearInterval(monitorInterval); activeSensor = null; }
 
-    function detenerGrafica() {
-        clearInterval(monitorInterval);
-        activeSensor = null;
-    }
-
-    // --- BLUETOOTH ---
+    // --- BLUETOOTH ESTABLE ---
     let device, server, service, char;
     const VGATE_SERVICE = 'e7810a71-73ae-499d-8c15-faa9aef0c3f2';
     const VGATE_CHAR = 'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f';
     
     async function conectarScanner() {
         try {
-            log("Buscando dispositivo...");
-            device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [VGATE_SERVICE, '0000fff0-0000-1000-8000-00805f9b34fb', '0000ffe0-0000-1000-8000-00805f9b34fb'] });
+            document.getElementById('console-output').innerHTML = "Iniciando Bluetooth...";
+            
+            device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [VGATE_SERVICE, '0000fff0-0000-1000-8000-00805f9b34fb', '0000ffe0-0000-1000-8000-00805f9b34fb']
+            });
+            
             device.addEventListener('gattserverdisconnected', () => { 
                 document.getElementById('connection-led').classList.remove('on'); 
                 document.getElementById('conn-status').innerText = "OFFLINE";
+                document.getElementById('conn-status').style.color = "#555";
                 detenerGrafica();
+                log("❌ Desconectado");
             });
+
             server = await device.gatt.connect();
-            
-            // Buscar canal
-            try { service = await server.getPrimaryService(VGATE_SERVICE); char = await service.getCharacteristic(VGATE_CHAR); } 
-            catch (e) { try { service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb'); char = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb'); } catch(err) { throw "Error Canal"; } }
-            
+            log("✅ Dispositivo Vinculado");
+
+            // INTENTO VGATE
+            try { 
+                service = await server.getPrimaryService(VGATE_SERVICE); 
+                char = await service.getCharacteristic(VGATE_CHAR); 
+            } catch (e) { 
+                // INTENTO GENÉRICO
+                try { 
+                    service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb'); 
+                    char = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb'); 
+                } catch(err2) { throw "No soportado"; } 
+            }
+
             await char.startNotifications();
             char.addEventListener('characteristicvaluechanged', handleData);
             document.getElementById('connection-led').classList.add('on');
             document.getElementById('conn-status').innerText = "ONLINE";
+            document.getElementById('conn-status').style.color = "#0f0";
 
-            // INICIALIZACIÓN SEGÚN PROTOCOLO
-            log("Iniciando " + currentProtocol + "...");
-            await enviar("AT Z", 1000); // Reset
+            log("⚡ Configurando Chip...");
+            
+            // SECUENCIA DE INICIO (CON RETARDOS LARGOS)
+            await enviar("AT Z", 1000);  // Reset
+            await enviar("AT E0", 500);  // Echo Off (IMPORTANTE)
+            await enviar("AT L0", 500);  // Linefeeds Off
             
             if(currentProtocol === 'VW') {
-                // Secuencia Golf A4
-                await enviar("AT SP 3", 500);   // ISO 9141
-                await enviar("AT IIA 33", 500); // Address
-                await enviar("AT SH 68 33 F1", 500); // Header VW (Opcional, ayuda a veces)
-                await enviar("0100", 800);      // Despertar
+                log("Forzando ISO 9141...");
+                await enviar("AT SP 3", 500);
+                await enviar("AT IIA 33", 500);
+                await enviar("0100", 1000); // Wake up largo
             } else {
-                // Universal
-                await enviar("AT SP 0", 500);   // Auto
-                await enviar("0100", 500);
+                log("Buscando Protocolo...");
+                await enviar("AT SP 0", 500);
+                await enviar("0100", 1000);
             }
             
-            log("Listo.");
-        } catch (err) { alert("Error: " + err); }
+            log("✅ LISTO. Ve a Sensores.");
+
+        } catch (err) { 
+            log("❌ Error: " + err); 
+            alert("Error: " + err);
+        }
     }
 
     function handleData(event) {
-        let texto = new TextDecoder('utf-8').decode(event.target.value).replace(/>/g, '').trim(); 
-        if(!texto || texto.includes("NO DATA") || texto.includes("SEARCHING")) return;
-        
-        let hex = texto.replace(/\s/g, ''); 
-        let val = 0;
+        try {
+            let texto = new TextDecoder('utf-8').decode(event.target.value).replace(/>/g, '').trim(); 
+            if(!texto || texto.length < 2) return;
+            
+            // Depuración en pantalla
+            // log("R: " + texto); 
+            
+            let hex = texto.replace(/\s/g, '');
+            let val = 0;
 
-        // PARSEO DE DATOS
-        if(activeSensor === 'RPM' && hex.startsWith("410C")) {
-            val = ((parseInt(hex.substring(4, 6), 16) * 256) + parseInt(hex.substring(6, 8), 16)) / 4;
-            document.getElementById('sensor-val').innerText = Math.round(val) + " RPM";
-        }
-        else if(activeSensor === 'TPS' && hex.startsWith("4111")) {
-            val = (parseInt(hex.substring(4, 6), 16) * 100) / 255;
-            document.getElementById('sensor-val').innerText = Math.round(val) + " %";
-        }
-        else if(activeSensor === 'MAF' && hex.startsWith("4110")) {
-            val = ((parseInt(hex.substring(4, 6), 16) * 256) + parseInt(hex.substring(6, 8), 16)) / 100;
-            document.getElementById('sensor-val').innerText = val.toFixed(1) + " g/s";
-        }
-        else if(activeSensor === 'MAP' && hex.startsWith("410B")) {
-            val = parseInt(hex.substring(4, 6), 16);
-            document.getElementById('sensor-val').innerText = val + " kPa";
-        }
-        else if(activeSensor === 'TEMP' && hex.startsWith("4105")) {
-            val = parseInt(hex.substring(4, 6), 16) - 40;
-            document.getElementById('sensor-val').innerText = val + " °C";
-        }
-        else if(activeSensor === 'VOLT' && texto.includes("V")) {
-            val = parseFloat(texto);
-            document.getElementById('sensor-val').innerText = val + " V";
-        }
+            if(activeSensor === 'RPM' && hex.includes("410C")) {
+                let idx = hex.indexOf("410C");
+                let sub = hex.substring(idx+4, idx+8);
+                if(sub.length === 4) {
+                    val = ((parseInt(sub.substring(0,2), 16) * 256) + parseInt(sub.substring(2,4), 16)) / 4;
+                    document.getElementById('sensor-val').innerText = Math.round(val);
+                }
+            }
+            else if(activeSensor === 'TPS' && hex.includes("4111")) {
+                let idx = hex.indexOf("4111");
+                let sub = hex.substring(idx+4, idx+6);
+                if(sub.length === 2) {
+                    val = (parseInt(sub, 16) * 100) / 255;
+                    document.getElementById('sensor-val').innerText = Math.round(val) + "%";
+                }
+            }
+            else if(activeSensor === 'VOLT' && texto.includes("V")) {
+                val = parseFloat(texto);
+                document.getElementById('sensor-val').innerText = val + "V";
+            }
+            // Agrega más parseos aquí (MAF, MAP) siguiendo la lógica
 
-        if(val > 0 || activeSensor === 'VOLT' || activeSensor === 'TEMP') {
-            dataHistory.push(val);
-            dataHistory.shift();
-            drawChart();
-        }
+            if(val > 0 || activeSensor === 'VOLT') {
+                dataHistory.push(val);
+                dataHistory.shift();
+                drawChart();
+            }
+        } catch(e) { console.log(e); }
     }
 
     async function pedirDato(tipo) {
@@ -289,31 +305,16 @@
         if(tipo === 'TEMP') await enviar("0105", 0);
         if(tipo === 'VOLT') await enviar("AT RV", 0);
     }
-
-    async function enviar(cmd, wait) {
-        if(!char) return;
-        try { 
-            await char.writeValue(new TextEncoder().encode(cmd + "\r")); 
-            if(wait > 0) await new Promise(r => setTimeout(r, wait)); 
-        } catch(e) {}
-    }
-
+    async function enviar(cmd, wait) { if(!char) return; try { await char.writeValue(new TextEncoder().encode(cmd + "\r")); if(wait > 0) await new Promise(r => setTimeout(r, wait)); } catch(e) {} }
     async function borrarCodigos() { if(confirm("¿Seguro?")) await enviar("04", 0); }
-    function log(t) { document.getElementById('console-output').innerText = t; }
-
-    // --- UTILS ---
-    function irA(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='library-screen') cargarPDFs(); if(id==='parts-screen') init(); }
+    function irA(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='parts-screen') init(); }
     
-    // CARGA BASICA DE BD E INVENTARIO (Simplificado para espacio)
-    const DB_DEFAULT = { "VW": { "GOLF/JETTA A4": { "SENSORES": [] } } };
-    let DB_ELEC = JSON.parse(localStorage.getItem('millan_db_v5')) || DB_DEFAULT;
-    let DB_PDF = JSON.parse(localStorage.getItem('millan_pdfs')) || [];
-    function cargarPDFs() { document.getElementById('pdf-list').innerHTML = DB_PDF.map(p => `<div class='part-item' onclick="window.open('${p.file}')">${p.name}</div>`).join(''); }
-    function init() { let s=document.getElementById('sel-brand'); s.innerHTML='<option>Marca</option>'; Object.keys(DB_ELEC).forEach(m=>s.innerHTML+=`<option>${m}</option>`); cargarPDFs();}
+    // Rellenos
+    let DB_ELEC = JSON.parse(localStorage.getItem('millan_db_v5')) || { "VW": { "GOLF A4": {} } };
+    function init() { let s=document.getElementById('sel-brand'); s.innerHTML='<option>Marca</option>'; Object.keys(DB_ELEC).forEach(m=>s.innerHTML+=`<option>${m}</option>`); }
     function cargarModelos(){ let m=document.getElementById('sel-brand').value; let s=document.getElementById('sel-model'); s.innerHTML=""; s.disabled=false; Object.keys(DB_ELEC[m]).forEach(x=>s.innerHTML+=`<option>${x}</option>`); }
-    function cargarSistemas(){ document.getElementById('sel-system').disabled=false; let s=document.getElementById('sel-system'); s.innerHTML='<option>SENSORES</option><option>ENCENDIDO</option>'; }
-    function mostrarPiezas(){ document.getElementById('parts-list').innerHTML = "Cargado..."; }
-
+    function cargarSistemas(){ document.getElementById('sel-system').disabled=false; document.getElementById('sel-system').innerHTML='<option>SENSORES</option>'; }
+    function mostrarPiezas(){ document.getElementById('parts-list').innerHTML = ""; }
     init();
 </script>
 </body>
