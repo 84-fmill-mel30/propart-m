@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProPart Millán - FINAL</title>
+    <title>ProPart Millán - VW ISO</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
     
@@ -73,7 +73,7 @@
             <div class="tile connect" onclick="conectarScanner()">
                 <i class="fas fa-plug" id="icon-conn"></i>
                 <h3 id="text-conn">CONECTAR ESCÁNER</h3>
-                <small style="color:#aaa;">V-Link / OBDII</small>
+                <small style="color:#aaa;">Forzar ISO 9141 (VW)</small>
             </div>
             
             <div class="tile" onclick="irA('parts-screen')">
@@ -275,7 +275,7 @@
         });
     }
 
-    // --- BLUETOOTH CON PROTOCOLO AUTOMÁTICO ---
+    // --- BLUETOOTH CON PROTOCOLO VW FORZADO (ISO 9141) ---
     let device, server, service, char;
     const VGATE_SERVICE = 'e7810a71-73ae-499d-8c15-faa9aef0c3f2';
     const VGATE_CHAR = 'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f';
@@ -315,13 +315,18 @@
             document.getElementById('connection-led').classList.add('on');
             document.getElementById('text-conn').innerText = "CONECTADO";
             
-            // --- INICIALIZACIÓN FUERTE (PARA GOLF A4) ---
-            log("Iniciando protocolos...");
-            await enviarComando("AT Z");     // Reset
+            // --- AQUÍ ESTÁ EL CAMBIO CLAVE PARA GOLF A4 ---
+            log("Configurando para VW Viejo...");
+            
+            await enviarComando("AT Z");     
+            await delay(1000);
+            
+            // FORZAR PROTOCOLO 3 (ISO 9141-2)
+            await enviarComando("AT SP 3");  
             await delay(500);
-            await enviarComando("AT SP 0");  // Protocolo Automático
-            await delay(500);
-            await enviarComando("0100");     // Despertar ECU
+
+            // DESPERTAR ECU (Secuencia lenta)
+            await enviarComando("0100");     
             
             setTimeout(() => irA('scanner-screen'), 2000);
 
