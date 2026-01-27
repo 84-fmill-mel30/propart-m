@@ -4,33 +4,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProPart Millán - V-Link</title>
+    <title>ProPart Millán - TOTAL</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
     
     <style>
-        :root { --primary: #00d2ff; --bg: #121212; --panel: #1e1e1e; --text: #fff; --success: #00ff88; }
+        :root { --primary: #ffd700; --bg: #121212; --panel: #1e1e1e; --text: #fff; --accent: #ffae00; --danger: #ff4444; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; user-select: none; }
         
         header { background: #000; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); }
-        .brand { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; }
+        .brand { font-size: 1.1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         .brand span { color: var(--primary); }
+        
+        .status-icons { display: flex; align-items: center; gap: 15px; }
+        .admin-lock { color: #555; font-size: 1.2rem; cursor: pointer; transition: 0.3s; }
+        .admin-lock.unlocked { color: var(--primary); }
         .led { width: 12px; height: 12px; background: #333; border-radius: 50%; border: 2px solid #555; }
-        .led.on { background: var(--success); box-shadow: 0 0 10px var(--success); border-color: #fff; }
+        .led.on { background: #0f0; box-shadow: 0 0 12px #0f0; border-color: #fff; }
 
-        .container { padding: 20px; max-width: 800px; margin: 0 auto; }
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .container { padding: 15px; max-width: 800px; margin: 0 auto; padding-bottom: 80px; }
         
-        .tile { background: var(--panel); border: 1px solid #333; border-radius: 15px; padding: 25px 10px; text-align: center; cursor: pointer; }
-        .tile:active { transform: scale(0.96); background: #252525; }
-        .tile i { font-size: 2.5rem; color: var(--primary); display: block; margin-bottom: 10px; }
-        .tile.connect { grid-column: span 2; background: rgba(0, 210, 255, 0.1); border-color: var(--primary); }
-        
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .tile { background: var(--panel); border: 1px solid #333; border-radius: 12px; padding: 20px 10px; text-align: center; cursor: pointer; }
+        .tile:active { transform: scale(0.96); background: #333; }
+        .tile i { font-size: 2rem; color: var(--primary); display: block; margin-bottom: 10px; }
+        .tile h3 { font-size: 0.85rem; margin: 0; text-transform: uppercase; font-weight: 600; }
+        .tile.connect { grid-column: span 2; background: rgba(255, 215, 0, 0.1); border-color: var(--primary); }
+
         .screen { display: none; }
-        .screen.active { display: block; }
+        .screen.active { display: block; animation: fade 0.3s; }
+        @keyframes fade { from {opacity:0} to {opacity:1} }
+
+        #console-output { background: #000; color: #0f0; font-family: monospace; padding: 15px; height: 120px; overflow-y: auto; border: 1px solid #333; margin-bottom: 10px; font-size: 0.8rem; border-radius: 8px; }
+
+        select, input, textarea { width: 100%; padding: 12px; margin-bottom: 15px; background: #222; border: 1px solid #555; color: #fff; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+        label { color: var(--primary); font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 5px; }
         
-        #console-output { background: #000; color: var(--success); font-family: monospace; padding: 15px; height: 150px; overflow-y: auto; border: 1px solid #333; margin-bottom: 10px; font-size: 0.9rem; }
-        .btn-back { background: transparent; border: 1px solid #555; color: #aaa; padding: 10px 20px; border-radius: 20px; margin-bottom: 20px; }
+        button.btn-action { background: var(--primary); color: #000; font-weight: bold; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; }
+        
+        .part-item { background: #1a1a1a; padding: 15px; border-left: 4px solid var(--primary); margin-bottom: 10px; border-radius: 4px; position: relative; }
+        .part-name { font-weight: bold; font-size: 1rem; }
+        .part-num { color: #aaa; font-size: 0.85rem; font-family: monospace; }
+        .part-note { color: var(--accent); font-size: 0.8rem; margin-top: 5px; display: block; }
+        .delete-btn { position: absolute; top: 10px; right: 10px; color: #ff4444; font-size: 1.2rem; display: none; cursor:pointer;}
+
+        .btn-back { background: #333; color: #fff; border: none; padding: 8px 20px; border-radius: 20px; margin-bottom: 15px; font-weight: bold; }
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
     </style>
 </head>
@@ -38,118 +56,361 @@
 
 <header>
     <div class="brand">PROPART <span>MILLÁN</span></div>
-    <div style="display:flex; align-items:center; gap:10px;">
-        <span style="font-size:0.7rem; color:#aaa;">IOS-VLINK</span>
-        <div id="connection-led" class="led"></div>
+    <div class="status-icons">
+        <i class="fas fa-lock admin-lock" id="lock-icon" onclick="abrirAdmin()"></i>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:0.65rem; color:#aaa;">SYSTEM</span>
+            <div id="connection-led" class="led"></div>
+        </div>
     </div>
 </header>
 
 <div class="container">
+
     <div id="menu-screen" class="screen active">
-        <h2 style="text-align:center;">Panel de Control</h2>
+        <h2 style="text-align:center; font-weight:300;">Panel Principal</h2>
         <div class="dashboard-grid">
             <div class="tile connect" onclick="conectarScanner()">
                 <i class="fas fa-plug" id="icon-conn"></i>
                 <h3 id="text-conn">CONECTAR ESCÁNER</h3>
-                <div style="font-size:0.7rem; color:#aaa; margin-top:5px;">Especial para IOS-Vlink</div>
+                <small style="color:#aaa;">V-Link / OBDII</small>
             </div>
-            <div class="tile" onclick="irA('scanner-screen')"><i class="fas fa-heartbeat"></i><h3>Diagnóstico</h3></div>
+            
+            <div class="tile" onclick="irA('parts-screen')">
+                <i class="fas fa-boxes"></i><h3>Inventario</h3>
+            </div>
+            
+            <div class="tile" onclick="irA('scanner-screen')">
+                <i class="fas fa-tachometer-alt"></i><h3>Diagnóstico</h3>
+            </div>
+
+            <div class="tile" onclick="irA('materials-screen')">
+                <i class="fas fa-tools"></i><h3>Materiales Taller</h3>
+            </div>
         </div>
     </div>
 
+    <div id="parts-screen" class="screen">
+        <button class="btn-back" onclick="irA('menu-screen')"> < Volver</button>
+        <button id="btn-add-part" class="btn-action" style="display:none; margin-bottom:15px; background:#444; color:#fff;" onclick="irA('add-screen')">+ AGREGAR PRODUCTO NUEVO</button>
+        
+        <h2>Base de Datos</h2>
+        <label>MARCA:</label>
+        <select id="sel-brand" onchange="cargarModelos()">
+            </select>
+        
+        <label>MODELO / AÑO:</label>
+        <select id="sel-model" onchange="cargarSistemas()" disabled><option>Esperando...</option></select>
+        
+        <label>SISTEMA:</label>
+        <select id="sel-system" onchange="mostrarPiezas()" disabled><option>Esperando...</option></select>
+
+        <div id="parts-list" style="margin-top:20px;"></div>
+    </div>
+
+    <div id="materials-screen" class="screen">
+        <button class="btn-back" onclick="irA('menu-screen')"> < Volver</button>
+        <h2>Materiales y Consumibles</h2>
+        <div id="materials-list"></div>
+    </div>
+
+    <div id="login-screen" class="screen" style="text-align:center; padding-top:50px;">
+        <i class="fas fa-user-shield" style="font-size:4rem; color:var(--primary); margin-bottom:20px;"></i>
+        <h3>Acceso Administrador</h3>
+        <input type="password" id="admin-pass" placeholder="Ingresa Contraseña">
+        <button class="btn-action" onclick="validarAdmin()">ENTRAR</button>
+        <button class="btn-back" style="margin-top:20px;" onclick="irA('menu-screen')">Cancelar</button>
+    </div>
+
+    <div id="add-screen" class="screen">
+        <button class="btn-back" onclick="irA('parts-screen')">Cancelar</button>
+        <h2>Nuevo Producto</h2>
+        
+        <label>Marca:</label>
+        <select id="new-brand" onchange="actualizarModelosNew()">
+            </select>
+
+        <label>Modelo / Año:</label>
+        <div style="display:flex; gap:10px;">
+            <select id="new-model" style="width:50%;" onchange="verificarOtroModelo()">
+                </select>
+            <input type="text" id="new-model-text" placeholder="Escribe Modelo y Año..." style="width:50%; display:none;">
+        </div>
+
+        <label>Sistema / Grupo:</label>
+        <select id="new-system">
+            <option value="SENSORES">SENSORES</option>
+            <option value="ENCENDIDO">ENCENDIDO (Bobinas/Cables)</option>
+            <option value="LUCES">LUCES Y FAROS</option>
+            <option value="RELAYS">RELAYS Y FUSIBLES</option>
+            <option value="MATERIALES">MATERIALES / VARIOS</option>
+        </select>
+
+        <label>Nombre del Producto:</label>
+        <input type="text" id="new-name" placeholder="Ej: Sensor Pedal Acelerador">
+
+        <label>Número de Parte:</label>
+        <input type="text" id="new-part" placeholder="Ej: 6PV 008 026-11">
+
+        <label>Nota Técnica:</label>
+        <textarea id="new-note" rows="3" placeholder="Ej: Revisar conector de 6 pines."></textarea>
+
+        <button class="btn-action" onclick="guardarProducto()">GUARDAR EN BD</button>
+    </div>
+
     <div id="scanner-screen" class="screen">
-        <button class="btn-back" onclick="irA('menu-screen')">Volver</button>
+        <button class="btn-back" onclick="irA('menu-screen')"> < Volver</button>
         <h2>Datos en Vivo</h2>
         <div id="console-output">Esperando conexión...<br>>_</div>
         <div class="dashboard-grid">
             <button class="tile" onclick="enviarComando('0105')">Temp. Motor</button>
-            <button class="tile" onclick="enviarComando('010C')">RPM</button>
             <button class="tile" onclick="enviarComando('AT RV')">Voltaje</button>
-            <button class="tile" style="border-color:red; color:red;" onclick="enviarComando('04')">Borrar DTC</button>
+            <button class="tile" onclick="enviarComando('010C')">RPM</button>
+            <button class="tile" style="border-color:red; color:red;" onclick="borrarCodigos()">BORRAR CÓDIGOS</button>
         </div>
     </div>
 </div>
 
 <script>
+    // --- AQUÍ ESTÁ LA LISTA MAESTRA DE MARCAS ---
+    // Agregué las vacías para que ya te salgan en el menú
+    const DB_DEFAULT = {
+        "VW": {
+            "GOLF/JETTA A4": {
+                "SENSORES": [
+                    { name: "Sensor Pedal Acelerador (APP)", part: "1J1 721 503 H", note: "Falla potencia." },
+                    { name: "Cuerpo Aceleración", part: "06A 133 062 AB", note: "Requiere ajuste." },
+                    { name: "Sensor O2 (Banco 1)", part: "06A906262Q", note: "4 Pines." }
+                ],
+                "ENCENDIDO": [{ name: "Bobina", part: "06A905115D", note: "Cuadrada." }],
+                "RELAYS": [{ name: "Relay 409", part: "1J0906383C", note: "Bomba Gasolina." }]
+            }
+        },
+        "NISSAN": {
+            "TSURU III": {
+                "SENSORES": [{ name: "TPS", part: "SERA483-06", note: "Ajustable." }]
+            }
+        },
+        "CHEVROLET": { "AVEO": {}, "CHEVY": {}, "SPARK": {} },
+        "FORD": { "RANGER": {}, "F-150": {}, "FIESTA": {} },
+        "TOYOTA": { "HIACE": {}, "COROLLA": {}, "HILUX": {} },
+        "HONDA": { "CIVIC": {}, "CR-V": {} },
+        "MAZDA": { "MAZDA 3": {} },
+        "DODGE": { "ATOS": {}, "VERNA": {}, "RAM": {} },
+        "JEEP": { "CHEROKEE": {} },
+        "HYUNDAI": { "GRAND I10": {} },
+        "KIA": { "RIO": {} },
+        "BMW": {}, 
+        "AUDI": {}, 
+        "SEAT": { "IBIZA": {} }, 
+        "RENAULT": { "DUSTER": {} },
+        "PEUGEOT": {},
+        "FIAT": {},
+        "UNIVERSAL": {
+            "TALLER": {
+                "MATERIALES": [
+                    { name: "Cable Automotriz Cal. 16", part: "ROJO", note: "Luces" },
+                    { name: "Thermofit 1/8", part: "NEGRO", note: "Aislante" },
+                    { name: "Cinta de Aislar", part: "3M", note: "Uso rudo" }
+                ]
+            }
+        }
+    };
+
+    let DB_ELEC = JSON.parse(localStorage.getItem('millan_db_v2')) || DB_DEFAULT;
+    let isAdmin = false;
+
+    // --- INICIALIZAR ---
+    function init() {
+        llenarSelectBrands('sel-brand');
+        llenarSelectBrands('new-brand');
+    }
+
+    function llenarSelectBrands(id) {
+        const sel = document.getElementById(id);
+        sel.innerHTML = '<option value="">Selecciona Marca...</option>';
+        Object.keys(DB_ELEC).sort().forEach(marca => {
+            sel.innerHTML += `<option value="${marca}">${marca}</option>`;
+        });
+    }
+
+    // --- NAVEGACIÓN ---
     function irA(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-    }
-    function log(txt) {
-        const d = document.getElementById('console-output');
-        d.innerHTML += `<div>${txt}</div>`;
-        d.scrollTop = d.scrollHeight;
-    }
-
-    let device, server, service, characteristic;
-
-    // AQUI ESTA LA MAGIA: Incluimos el UUID "Secreto" de Vgate (E781...)
-    const VGATE_SERVICE = 'e7810a71-73ae-499d-8c15-faa9aef0c3f2';
-    const VGATE_CHAR    = 'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f';
-    
-    // Lista de canales a pedir permiso
-    const OPTIONAL_SERVICES = [
-        VGATE_SERVICE, 
-        '0000fff0-0000-1000-8000-00805f9b34fb',
-        '0000ffe0-0000-1000-8000-00805f9b34fb'
-    ];
-
-    async function conectarScanner() {
-        try {
-            log("📡 Buscando IOS-Vlink...");
-            
-            device = await navigator.bluetooth.requestDevice({
-                acceptAllDevices: true,
-                optionalServices: OPTIONAL_SERVICES
-            });
-
-            log("Conectando a " + device.name + "...");
-            server = await device.gatt.connect();
-            log("✅ Servidor Conectado.");
-
-            // 1. INTENTO VGATE (El más probable para tu scanner)
-            try {
-                log("Probando canal V-Link (E781)...");
-                service = await server.getPrimaryService(VGATE_SERVICE);
-                characteristic = await service.getCharacteristic(VGATE_CHAR);
-                log("¡CANAL VGATE ENCONTRADO! 🔓");
-            } catch (e) {
-                log("Vgate falló, probando genéricos...");
-                // 2. INTENTO GENÉRICO
-                try {
-                    service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
-                    characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-                    log("Canal Genérico OK");
-                } catch(err2) {
-                    throw "No se encontró ningún canal de datos compatible.";
-                }
-            }
-
-            // EXITO
-            document.getElementById('connection-led').classList.add('on');
-            document.getElementById('text-conn').innerText = "CONECTADO ✅";
-            document.getElementById('icon-conn').className = "fas fa-link";
-            log("¡SISTEMA OPERATIVO!");
-
-            // Comandos de inicialización
-            await enviarComando("ATZ");
-            setTimeout(() => irA('scanner-screen'), 1000);
-
-        } catch (error) {
-            log("❌ Error: " + error);
+        if(id === 'materials-screen') cargarMateriales();
+        if(id === 'add-screen') {
+            document.getElementById('new-model-text').style.display = 'none';
+            document.getElementById('new-model').style.display = 'block';
+            actualizarModelosNew();
         }
     }
 
-    async function enviarComando(cmd) {
-        if (!characteristic) return log("Error: No conectado");
-        try {
-            let enc = new TextEncoder();
-            await characteristic.writeValue(enc.encode(cmd + '\r'));
-            log(">> " + cmd);
-        } catch (e) { log("Error envío: " + e); }
+    // --- ADMIN ---
+    function abrirAdmin() {
+        if(isAdmin) alert("Ya eres Administrador."); else irA('login-screen');
     }
-    
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+    function validarAdmin() {
+        if(document.getElementById('admin-pass').value === "1234") {
+            isAdmin = true;
+            document.getElementById('lock-icon').className = "fas fa-unlock admin-lock unlocked";
+            document.getElementById('btn-add-part').style.display = "block";
+            alert("Modo Admin: ACTIVADO");
+            irA('menu-screen');
+        } else alert("Contraseña incorrecta");
+    }
+
+    // --- AGREGAR ---
+    function actualizarModelosNew() {
+        const marca = document.getElementById('new-brand').value;
+        const sel = document.getElementById('new-model');
+        sel.innerHTML = "";
+        if(DB_ELEC[marca]) {
+            Object.keys(DB_ELEC[marca]).forEach(m => sel.innerHTML += `<option value="${m}">${m}</option>`);
+        }
+        sel.innerHTML += `<option value="OTRO">CREAR NUEVO MODELO...</option>`;
+    }
+
+    function verificarOtroModelo() {
+        const val = document.getElementById('new-model').value;
+        if(val === 'OTRO') {
+            document.getElementById('new-model').style.display = 'none';
+            document.getElementById('new-model-text').style.display = 'block';
+            document.getElementById('new-model-text').focus();
+        }
+    }
+
+    function guardarProducto() {
+        const marca = document.getElementById('new-brand').value;
+        let modelo = document.getElementById('new-model').value;
+        if(modelo === 'OTRO') modelo = document.getElementById('new-model-text').value.toUpperCase();
+        
+        const sistema = document.getElementById('new-system').value;
+        const nombre = document.getElementById('new-name').value;
+        const parte = document.getElementById('new-part').value;
+        const nota = document.getElementById('new-note').value;
+
+        if(!nombre || !modelo) return alert("Faltan datos (Nombre o Modelo)");
+
+        if(!DB_ELEC[marca]) DB_ELEC[marca] = {};
+        if(!DB_ELEC[marca][modelo]) DB_ELEC[marca][modelo] = {};
+        if(!DB_ELEC[marca][modelo][sistema]) DB_ELEC[marca][modelo][sistema] = [];
+
+        DB_ELEC[marca][modelo][sistema].push({ name: nombre, part: parte, note: nota });
+        localStorage.setItem('millan_db_v2', JSON.stringify(DB_ELEC));
+
+        alert("Guardado OK.");
+        document.getElementById('new-name').value = "";
+        document.getElementById('new-part').value = "";
+        irA('parts-screen');
+    }
+
+    function borrarProducto(marca, modelo, sistema, index) {
+        if(confirm("¿Borrar esta pieza?")) {
+            DB_ELEC[marca][modelo][sistema].splice(index, 1);
+            localStorage.setItem('millan_db_v2', JSON.stringify(DB_ELEC));
+            mostrarPiezas();
+        }
+    }
+
+    // --- MOSTRAR ---
+    function cargarModelos() {
+        const marca = document.getElementById('sel-brand').value;
+        const selModel = document.getElementById('sel-model');
+        const selSys = document.getElementById('sel-system');
+        selModel.innerHTML = '<option>Selecciona Modelo</option>';
+        selModel.disabled = true; selSys.disabled = true;
+        document.getElementById('parts-list').innerHTML = '';
+        if(marca && DB_ELEC[marca]) {
+            selModel.disabled = false;
+            Object.keys(DB_ELEC[marca]).forEach(m => selModel.innerHTML += `<option value="${m}">${m}</option>`);
+        }
+    }
+    function cargarSistemas() {
+        const marca = document.getElementById('sel-brand').value;
+        const modelo = document.getElementById('sel-model').value;
+        const selSys = document.getElementById('sel-system');
+        selSys.innerHTML = '<option>Selecciona Sistema</option>';
+        selSys.disabled = true;
+        if(modelo && DB_ELEC[marca][modelo]) {
+            selSys.disabled = false;
+            Object.keys(DB_ELEC[marca][modelo]).forEach(s => selSys.innerHTML += `<option value="${s}">${s}</option>`);
+        }
+    }
+    function mostrarPiezas() {
+        const marca = document.getElementById('sel-brand').value;
+        const modelo = document.getElementById('sel-model').value;
+        const sistema = document.getElementById('sel-system').value;
+        const div = document.getElementById('parts-list');
+        div.innerHTML = '';
+        if(sistema && DB_ELEC[marca][modelo][sistema]) {
+            DB_ELEC[marca][modelo][sistema].forEach((p, idx) => {
+                let btnDel = isAdmin ? `<i class="fas fa-trash delete-btn" style="display:block" onclick="borrarProducto('${marca}','${modelo}','${sistema}',${idx})"></i>` : '';
+                div.innerHTML += `
+                    <div class="part-item">
+                        ${btnDel}
+                        <div class="part-name">${p.name}</div>
+                        <div class="part-num">NP: ${p.part}</div>
+                        <small class="part-note"><i class="fas fa-bolt"></i> ${p.note}</small>
+                    </div>`;
+            });
+        }
+    }
+    function cargarMateriales() {
+        const div = document.getElementById('materials-list');
+        div.innerHTML = "";
+        if(DB_ELEC["UNIVERSAL"] && DB_ELEC["UNIVERSAL"]["TALLER"]["MATERIALES"]) {
+            DB_ELEC["UNIVERSAL"]["TALLER"]["MATERIALES"].forEach(p => {
+                div.innerHTML += `
+                    <div class="part-item" style="border-left-color: #fff;">
+                        <div class="part-name">${p.name}</div>
+                        <div class="part-num">${p.part}</div>
+                        <small class="part-note">${p.note}</small>
+                    </div>`;
+            });
+        }
+    }
+
+    // --- BLUETOOTH (NO TOCAR - YA FUNCIONA) ---
+    let device, server, service, char;
+    const VGATE_SERVICE = 'e7810a71-73ae-499d-8c15-faa9aef0c3f2';
+    const VGATE_CHAR = 'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f';
+    async function conectarScanner() {
+        try {
+            log("📡 Buscando...");
+            device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [VGATE_SERVICE, '0000fff0-0000-1000-8000-00805f9b34fb', '0000ffe0-0000-1000-8000-00805f9b34fb']
+            });
+            server = await device.gatt.connect();
+            log("✅ Conectado.");
+            try {
+                service = await server.getPrimaryService(VGATE_SERVICE);
+                char = await service.getCharacteristic(VGATE_CHAR);
+                log("V-Link OK");
+            } catch (e) {
+                try {
+                    service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+                    char = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+                    log("Genérico OK");
+                } catch(err2) { throw "Sin datos"; }
+            }
+            document.getElementById('connection-led').classList.add('on');
+            document.getElementById('text-conn').innerText = "CONECTADO";
+            await enviarComando("ATZ");
+            setTimeout(() => irA('scanner-screen'), 1000);
+        } catch (err) { log("Error: " + err); }
+    }
+    async function enviarComando(cmd) {
+        if(!char) return;
+        try { let enc = new TextEncoder(); await char.writeValue(enc.encode(cmd + "\r")); log(">> " + cmd); } catch(e) { log("Error TX: " + e); }
+    }
+    async function borrarCodigos() { if(confirm("¿Borrar Códigos?")) { await enviarComando("04"); log("🧹 Reset"); } }
+    function log(t) { const c=document.getElementById('console-output'); c.innerHTML+=`<div>${t}</div>`; c.scrollTop=c.scrollHeight;}
+
+    // INICIAR
+    init();
+    if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>
