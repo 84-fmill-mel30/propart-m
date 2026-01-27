@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProPart Millán - TOTAL</title>
+    <title>ProPart Millán - FINAL</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
     
     <style>
-        :root { --primary: #ffd700; --bg: #121212; --panel: #1e1e1e; --text: #fff; --accent: #ffae00; --danger: #ff4444; }
+        :root { --primary: #ffd700; --bg: #121212; --panel: #1e1e1e; --text: #fff; --accent: #ffae00; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; user-select: none; }
         
         header { background: #000; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); }
@@ -35,7 +35,7 @@
         .screen.active { display: block; animation: fade 0.3s; }
         @keyframes fade { from {opacity:0} to {opacity:1} }
 
-        #console-output { background: #000; color: #0f0; font-family: monospace; padding: 15px; height: 120px; overflow-y: auto; border: 1px solid #333; margin-bottom: 10px; font-size: 0.8rem; border-radius: 8px; }
+        #console-output { background: #000; color: #0f0; font-family: monospace; padding: 15px; height: 150px; overflow-y: auto; border: 1px solid #333; margin-bottom: 10px; font-size: 0.9rem; border-radius: 8px; }
 
         select, input, textarea { width: 100%; padding: 12px; margin-bottom: 15px; background: #222; border: 1px solid #555; color: #fff; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
         label { color: var(--primary); font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 5px; }
@@ -130,30 +130,23 @@
         <select id="new-brand" onchange="actualizarModelosNew()">
             </select>
 
-        <label>Modelo / Año:</label>
         <div style="display:flex; gap:10px;">
-            <select id="new-model" style="width:50%;" onchange="verificarOtroModelo()">
-                </select>
+            <select id="new-model" style="width:50%;" onchange="verificarOtroModelo()"></select>
             <input type="text" id="new-model-text" placeholder="Escribe Modelo y Año..." style="width:50%; display:none;">
         </div>
 
         <label>Sistema / Grupo:</label>
         <select id="new-system">
             <option value="SENSORES">SENSORES</option>
-            <option value="ENCENDIDO">ENCENDIDO (Bobinas/Cables)</option>
-            <option value="LUCES">LUCES Y FAROS</option>
-            <option value="RELAYS">RELAYS Y FUSIBLES</option>
+            <option value="ENCENDIDO">ENCENDIDO</option>
+            <option value="LUCES">LUCES</option>
+            <option value="RELAYS">RELAYS/FUSIBLES</option>
             <option value="MATERIALES">MATERIALES / VARIOS</option>
         </select>
 
-        <label>Nombre del Producto:</label>
-        <input type="text" id="new-name" placeholder="Ej: Sensor Pedal Acelerador">
-
-        <label>Número de Parte:</label>
+        <input type="text" id="new-name" placeholder="Ej: Sensor Pedal">
         <input type="text" id="new-part" placeholder="Ej: 6PV 008 026-11">
-
-        <label>Nota Técnica:</label>
-        <textarea id="new-note" rows="3" placeholder="Ej: Revisar conector de 6 pines."></textarea>
+        <textarea id="new-note" rows="3" placeholder="Ej: Revisar conector."></textarea>
 
         <button class="btn-action" onclick="guardarProducto()">GUARDAR EN BD</button>
     </div>
@@ -172,52 +165,21 @@
 </div>
 
 <script>
-    // --- AQUÍ ESTÁ LA LISTA MAESTRA DE MARCAS ---
-    // Agregué las vacías para que ya te salgan en el menú
+    // --- LISTA MAESTRA ---
     const DB_DEFAULT = {
-        "VW": {
-            "GOLF/JETTA A4": {
-                "SENSORES": [
-                    { name: "Sensor Pedal Acelerador (APP)", part: "1J1 721 503 H", note: "Falla potencia." },
-                    { name: "Cuerpo Aceleración", part: "06A 133 062 AB", note: "Requiere ajuste." },
-                    { name: "Sensor O2 (Banco 1)", part: "06A906262Q", note: "4 Pines." }
-                ],
-                "ENCENDIDO": [{ name: "Bobina", part: "06A905115D", note: "Cuadrada." }],
-                "RELAYS": [{ name: "Relay 409", part: "1J0906383C", note: "Bomba Gasolina." }]
-            }
-        },
-        "NISSAN": {
-            "TSURU III": {
-                "SENSORES": [{ name: "TPS", part: "SERA483-06", note: "Ajustable." }]
-            }
-        },
-        "CHEVROLET": { "AVEO": {}, "CHEVY": {}, "SPARK": {} },
-        "FORD": { "RANGER": {}, "F-150": {}, "FIESTA": {} },
-        "TOYOTA": { "HIACE": {}, "COROLLA": {}, "HILUX": {} },
+        "VW": { "GOLF/JETTA A4": { "SENSORES": [], "ENCENDIDO": [], "RELAYS": [] } },
+        "NISSAN": { "TSURU III": { "SENSORES": [] } },
+        "CHEVROLET": { "AVEO": {}, "CHEVY": {} },
+        "FORD": { "RANGER": {}, "F-150": {} },
+        "TOYOTA": { "HIACE": {}, "COROLLA": {} },
         "HONDA": { "CIVIC": {}, "CR-V": {} },
         "MAZDA": { "MAZDA 3": {} },
-        "DODGE": { "ATOS": {}, "VERNA": {}, "RAM": {} },
-        "JEEP": { "CHEROKEE": {} },
-        "HYUNDAI": { "GRAND I10": {} },
-        "KIA": { "RIO": {} },
-        "BMW": {}, 
-        "AUDI": {}, 
-        "SEAT": { "IBIZA": {} }, 
-        "RENAULT": { "DUSTER": {} },
-        "PEUGEOT": {},
-        "FIAT": {},
-        "UNIVERSAL": {
-            "TALLER": {
-                "MATERIALES": [
-                    { name: "Cable Automotriz Cal. 16", part: "ROJO", note: "Luces" },
-                    { name: "Thermofit 1/8", part: "NEGRO", note: "Aislante" },
-                    { name: "Cinta de Aislar", part: "3M", note: "Uso rudo" }
-                ]
-            }
-        }
+        "DODGE": { "ATOS": {}, "RAM": {} },
+        "JEEP": {}, "HYUNDAI": {}, "KIA": {}, "BMW": {}, "AUDI": {}, "SEAT": {}, "RENAULT": {}, "PEUGEOT": {}, "FIAT": {},
+        "UNIVERSAL": { "TALLER": { "MATERIALES": [ {name:"Cable 16",part:"Rojo",note:"Luces"}, {name:"Thermofit",part:"Negro",note:"Aislante"} ] } }
     };
 
-    let DB_ELEC = JSON.parse(localStorage.getItem('millan_db_v2')) || DB_DEFAULT;
+    let DB_ELEC = JSON.parse(localStorage.getItem('millan_db_v3')) || DB_DEFAULT;
     let isAdmin = false;
 
     // --- INICIALIZAR ---
@@ -225,13 +187,10 @@
         llenarSelectBrands('sel-brand');
         llenarSelectBrands('new-brand');
     }
-
     function llenarSelectBrands(id) {
         const sel = document.getElementById(id);
         sel.innerHTML = '<option value="">Selecciona Marca...</option>';
-        Object.keys(DB_ELEC).sort().forEach(marca => {
-            sel.innerHTML += `<option value="${marca}">${marca}</option>`;
-        });
+        Object.keys(DB_ELEC).sort().forEach(marca => sel.innerHTML += `<option value="${marca}">${marca}</option>`);
     }
 
     // --- NAVEGACIÓN ---
@@ -246,96 +205,58 @@
         }
     }
 
-    // --- ADMIN ---
-    function abrirAdmin() {
-        if(isAdmin) alert("Ya eres Administrador."); else irA('login-screen');
-    }
+    // --- ADMIN Y BD ---
+    function abrirAdmin() { if(isAdmin) alert("Ya eres Admin."); else irA('login-screen'); }
     function validarAdmin() {
         if(document.getElementById('admin-pass').value === "1234") {
             isAdmin = true;
             document.getElementById('lock-icon').className = "fas fa-unlock admin-lock unlocked";
             document.getElementById('btn-add-part').style.display = "block";
-            alert("Modo Admin: ACTIVADO");
-            irA('menu-screen');
-        } else alert("Contraseña incorrecta");
+            alert("Modo Admin ACTIVADO"); irA('menu-screen');
+        } else alert("Error");
     }
 
-    // --- AGREGAR ---
     function actualizarModelosNew() {
         const marca = document.getElementById('new-brand').value;
         const sel = document.getElementById('new-model');
         sel.innerHTML = "";
-        if(DB_ELEC[marca]) {
-            Object.keys(DB_ELEC[marca]).forEach(m => sel.innerHTML += `<option value="${m}">${m}</option>`);
-        }
-        sel.innerHTML += `<option value="OTRO">CREAR NUEVO MODELO...</option>`;
+        if(DB_ELEC[marca]) Object.keys(DB_ELEC[marca]).forEach(m => sel.innerHTML += `<option value="${m}">${m}</option>`);
+        sel.innerHTML += `<option value="OTRO">CREAR NUEVO...</option>`;
     }
-
-    function verificarOtroModelo() {
-        const val = document.getElementById('new-model').value;
-        if(val === 'OTRO') {
-            document.getElementById('new-model').style.display = 'none';
-            document.getElementById('new-model-text').style.display = 'block';
-            document.getElementById('new-model-text').focus();
-        }
-    }
-
+    function verificarOtroModelo() { if(document.getElementById('new-model').value === 'OTRO') { document.getElementById('new-model').style.display='none'; document.getElementById('new-model-text').style.display='block'; } }
+    
     function guardarProducto() {
         const marca = document.getElementById('new-brand').value;
         let modelo = document.getElementById('new-model').value;
         if(modelo === 'OTRO') modelo = document.getElementById('new-model-text').value.toUpperCase();
-        
         const sistema = document.getElementById('new-system').value;
         const nombre = document.getElementById('new-name').value;
         const parte = document.getElementById('new-part').value;
         const nota = document.getElementById('new-note').value;
-
-        if(!nombre || !modelo) return alert("Faltan datos (Nombre o Modelo)");
-
+        
+        if(!nombre || !modelo) return alert("Faltan datos");
         if(!DB_ELEC[marca]) DB_ELEC[marca] = {};
         if(!DB_ELEC[marca][modelo]) DB_ELEC[marca][modelo] = {};
         if(!DB_ELEC[marca][modelo][sistema]) DB_ELEC[marca][modelo][sistema] = [];
-
-        DB_ELEC[marca][modelo][sistema].push({ name: nombre, part: parte, note: nota });
-        localStorage.setItem('millan_db_v2', JSON.stringify(DB_ELEC));
-
-        alert("Guardado OK.");
-        document.getElementById('new-name').value = "";
-        document.getElementById('new-part').value = "";
-        irA('parts-screen');
+        
+        DB_ELEC[marca][modelo][sistema].push({name:nombre, part:parte, note:nota});
+        localStorage.setItem('millan_db_v3', JSON.stringify(DB_ELEC));
+        alert("Guardado"); irA('parts-screen');
     }
 
-    function borrarProducto(marca, modelo, sistema, index) {
-        if(confirm("¿Borrar esta pieza?")) {
-            DB_ELEC[marca][modelo][sistema].splice(index, 1);
-            localStorage.setItem('millan_db_v2', JSON.stringify(DB_ELEC));
-            mostrarPiezas();
-        }
-    }
-
-    // --- MOSTRAR ---
     function cargarModelos() {
         const marca = document.getElementById('sel-brand').value;
         const selModel = document.getElementById('sel-model');
-        const selSys = document.getElementById('sel-system');
-        selModel.innerHTML = '<option>Selecciona Modelo</option>';
-        selModel.disabled = true; selSys.disabled = true;
+        selModel.innerHTML = '<option>Selecciona Modelo</option>'; selModel.disabled = true;
         document.getElementById('parts-list').innerHTML = '';
-        if(marca && DB_ELEC[marca]) {
-            selModel.disabled = false;
-            Object.keys(DB_ELEC[marca]).forEach(m => selModel.innerHTML += `<option value="${m}">${m}</option>`);
-        }
+        if(marca && DB_ELEC[marca]) { selModel.disabled = false; Object.keys(DB_ELEC[marca]).forEach(m => selModel.innerHTML += `<option value="${m}">${m}</option>`); }
     }
     function cargarSistemas() {
         const marca = document.getElementById('sel-brand').value;
         const modelo = document.getElementById('sel-model').value;
         const selSys = document.getElementById('sel-system');
-        selSys.innerHTML = '<option>Selecciona Sistema</option>';
-        selSys.disabled = true;
-        if(modelo && DB_ELEC[marca][modelo]) {
-            selSys.disabled = false;
-            Object.keys(DB_ELEC[marca][modelo]).forEach(s => selSys.innerHTML += `<option value="${s}">${s}</option>`);
-        }
+        selSys.innerHTML = '<option>Selecciona Sistema</option>'; selSys.disabled = true;
+        if(modelo && DB_ELEC[marca][modelo]) { selSys.disabled = false; Object.keys(DB_ELEC[marca][modelo]).forEach(s => selSys.innerHTML += `<option value="${s}">${s}</option>`); }
     }
     function mostrarPiezas() {
         const marca = document.getElementById('sel-brand').value;
@@ -343,38 +264,22 @@
         const sistema = document.getElementById('sel-system').value;
         const div = document.getElementById('parts-list');
         div.innerHTML = '';
-        if(sistema && DB_ELEC[marca][modelo][sistema]) {
-            DB_ELEC[marca][modelo][sistema].forEach((p, idx) => {
-                let btnDel = isAdmin ? `<i class="fas fa-trash delete-btn" style="display:block" onclick="borrarProducto('${marca}','${modelo}','${sistema}',${idx})"></i>` : '';
-                div.innerHTML += `
-                    <div class="part-item">
-                        ${btnDel}
-                        <div class="part-name">${p.name}</div>
-                        <div class="part-num">NP: ${p.part}</div>
-                        <small class="part-note"><i class="fas fa-bolt"></i> ${p.note}</small>
-                    </div>`;
-            });
-        }
+        if(sistema && DB_ELEC[marca][modelo][sistema]) DB_ELEC[marca][modelo][sistema].forEach(p => {
+            div.innerHTML += `<div class="part-item"><div class="part-name">${p.name}</div><div class="part-num">NP: ${p.part}</div><small class="part-note">${p.note}</small></div>`;
+        });
     }
     function cargarMateriales() {
-        const div = document.getElementById('materials-list');
-        div.innerHTML = "";
-        if(DB_ELEC["UNIVERSAL"] && DB_ELEC["UNIVERSAL"]["TALLER"]["MATERIALES"]) {
-            DB_ELEC["UNIVERSAL"]["TALLER"]["MATERIALES"].forEach(p => {
-                div.innerHTML += `
-                    <div class="part-item" style="border-left-color: #fff;">
-                        <div class="part-name">${p.name}</div>
-                        <div class="part-num">${p.part}</div>
-                        <small class="part-note">${p.note}</small>
-                    </div>`;
-            });
-        }
+        const div = document.getElementById('materials-list'); div.innerHTML = "";
+        if(DB_ELEC["UNIVERSAL"] && DB_ELEC["UNIVERSAL"]["TALLER"]["MATERIALES"]) DB_ELEC["UNIVERSAL"]["TALLER"]["MATERIALES"].forEach(p => {
+            div.innerHTML += `<div class="part-item" style="border-left-color:#fff;"><div class="part-name">${p.name}</div><div class="part-num">${p.part}</div><small class="part-note">${p.note}</small></div>`;
+        });
     }
 
-    // --- BLUETOOTH (NO TOCAR - YA FUNCIONA) ---
+    // --- BLUETOOTH CON RESPUESTA (MODO ESCUCHA) ---
     let device, server, service, char;
     const VGATE_SERVICE = 'e7810a71-73ae-499d-8c15-faa9aef0c3f2';
     const VGATE_CHAR = 'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f';
+    
     async function conectarScanner() {
         try {
             log("📡 Buscando...");
@@ -382,33 +287,63 @@
                 acceptAllDevices: true,
                 optionalServices: [VGATE_SERVICE, '0000fff0-0000-1000-8000-00805f9b34fb', '0000ffe0-0000-1000-8000-00805f9b34fb']
             });
+            device.addEventListener('gattserverdisconnected', () => {
+                log("⚠️ Desconectado. Reconectar.");
+                document.getElementById('connection-led').classList.remove('on');
+            });
+
             server = await device.gatt.connect();
             log("✅ Conectado.");
+
+            // Buscar Canal
             try {
                 service = await server.getPrimaryService(VGATE_SERVICE);
                 char = await service.getCharacteristic(VGATE_CHAR);
-                log("V-Link OK");
+                log("V-Link Protocol Activo");
             } catch (e) {
                 try {
                     service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
                     char = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-                    log("Genérico OK");
+                    log("Standard Protocol Activo");
                 } catch(err2) { throw "Sin datos"; }
             }
+
+            // ACTIVAR OIDOS (NOTIFICACIONES)
+            await char.startNotifications();
+            char.addEventListener('characteristicvaluechanged', handleData);
+            
             document.getElementById('connection-led').classList.add('on');
             document.getElementById('text-conn').innerText = "CONECTADO";
+            
             await enviarComando("ATZ");
             setTimeout(() => irA('scanner-screen'), 1000);
+
         } catch (err) { log("Error: " + err); }
     }
-    async function enviarComando(cmd) {
-        if(!char) return;
-        try { let enc = new TextEncoder(); await char.writeValue(enc.encode(cmd + "\r")); log(">> " + cmd); } catch(e) { log("Error TX: " + e); }
-    }
-    async function borrarCodigos() { if(confirm("¿Borrar Códigos?")) { await enviarComando("04"); log("🧹 Reset"); } }
-    function log(t) { const c=document.getElementById('console-output'); c.innerHTML+=`<div>${t}</div>`; c.scrollTop=c.scrollHeight;}
 
-    // INICIAR
+    function handleData(event) {
+        let value = event.target.value;
+        let decoder = new TextDecoder('utf-8');
+        let texto = decoder.decode(value).replace(/>/g, '').trim(); // Limpiar respuesta
+        if(texto) log("<span style='color:#fff'>R: " + texto + "</span>");
+    }
+
+    async function enviarComando(cmd) {
+        if(!char) return log("No conectado (Usa el botón de conectar)");
+        try {
+            let enc = new TextEncoder();
+            await char.writeValue(enc.encode(cmd + "\r"));
+            log(">> " + cmd);
+        } catch(e) { log("Error TX: " + e); }
+    }
+
+    async function borrarCodigos() {
+        if(confirm("¿Borrar Códigos? (Motor debe estar apagado, switch ON)")) {
+            await enviarComando("04");
+        }
+    }
+    
+    function log(t) { const c=document.getElementById('console-output'); c.innerHTML+=`<div>${t}</div>`; c.scrollTop=c.scrollHeight;}
     init();
     if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
