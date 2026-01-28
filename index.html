@@ -4,25 +4,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProPart Millán - V30</title>
-    
+    <title>ProPart Millán - V31</title>
     <style>
-        :root { --primary: #ffd700; --bg: #050505; --panel: #141414; --text: #e0e0e0; --accent: #00ff00; --danger: #ff4444; --info: #00d2ff; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; user-select: none; overflow: hidden; }
+        body { background: #000; color: #eee; font-family: sans-serif; margin: 0; padding: 10px; }
+        .header { border-bottom: 2px solid #ffd700; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; }
+        .title { font-weight: bold; color: #fff; }
+        .title span { color: #ffd700; }
+        .status { color: #555; font-size: 0.8rem; }
         
-        header { background: linear-gradient(180deg, #1a1a1a 0%, #000 100%); padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); }
-        .brand { font-size: 1.1rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #fff; }
-        .brand span { color: var(--primary); }
-        .led { width: 10px; height: 10px; background: #333; border-radius: 50%; border: 1px solid #555; transition:0.3s; }
-        .led.on { background: #0f0; box-shadow: 0 0 10px #0f0; border-color: #fff; }
-
-        .container { padding: 15px; max-width: 800px; margin: 0 auto; height: calc(100vh - 60px); overflow-y: auto; padding-bottom: 80px; box-sizing: border-box; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn { background: #1a1a1a; border: 1px solid #333; padding: 20px; text-align: center; border-radius: 10px; cursor: pointer; }
+        .btn:active { background: #333; }
+        .btn i { display: block; font-size: 1.5rem; margin-bottom: 5px; color: #ffd700; }
         
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .tile { background: var(--panel); border: 1px solid #333; border-radius: 12px; padding: 20px 10px; text-align: center; cursor: pointer; transition: 0.1s; position: relative; }
-        .tile:active { transform: scale(0.98); background: #222; border-color: var(--primary); }
-        .tile i { font-size: 2rem; color: var(--primary); display: block; margin-bottom: 10px; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        
+        .back-btn { background: #333; color: white; border: none; padding: 10px 20px; border-radius: 20px; margin-bottom: 15px; width: 100%; }
+        
+        /* ESTILOS PARA CÓDIGOS */
+        .code-btn { background: #002244; color: #00ccff; border: 1px solid #00ccff; padding: 10px; margin: 5px; border-radius: 5px; display: inline-block; width: 40%; text-align: center; font-weight: bold; }
+        
+        /* ESTILOS PARA GUÍA */
+        .card { background: #111; border-left: 4px solid #00ccff; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+        .wire { padding: 5px; border-bottom: 1px solid #222; font-family: monospace; font-size: 0.85rem; }
+        .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
 
-        /* INTERRUPTOR PROTOCOLO */
-        .proto-switch { display: flex; background: #222; border-radius: 10px; margin-bottom: 15px; border: 1px solid #444; overflow: hidden; }
-        .proto-opt { flex: 1; text-align: center; padding: 12px; font-size: 0.8re
+        /* MODAL */
+        #modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:none; justify-content:center; align-items:center; z-index:99; }
+        #modal-content { background:#222; padding:20px; border:1px solid #ffd700; border-radius:10px; max-width:90%; }
+        
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="title">PROPART <span>MILLÁN</span></div>
+    <div id="status" class="status">OFFLINE</div>
+</div>
+
+<div id="menu" class="screen active">
+    <div class="grid">
+        <div class="btn" onclick="conectar()"><i class="fas fa-plug"></i>CONECTAR</div>
+        <div class="btn" onclick="nav('codigos')"><i class="fas fa-exclamation-triangle"></i>FALLAS DTC</div>
+        <div class="btn" onclick="nav('sensores')"><i class="fas fa-tachometer-alt"></i>SENSORES</div>
+        <div class="btn" onclick="nav('guia')"><i class="fas fa-book"></i>GUÍA CABLES</div>
+    </div>
+    <div style="text-align:center; margin-top:20px; color:#444; font-size:0.8rem;">V31 - Sistema Seguro</div>
+</div>
+
+<div id="codigos" class="screen">
+    <button class="back-btn" onclick="nav('menu')">VOLVER</button>
+    <h3>Códigos de Falla:</h3>
+    <div id="lista-codigos" style="text-align:center; min-height:50px; border:1px dashed #333; padding:10px;">
+        Presiona LEER para buscar.
+    </div>
+    <div class="grid">
+        <div class="btn" style="border-color:#0f0" onclick="leerDTC()">LEER</div>
+        <div class="btn" style="border-color:#f00" onclick="borrarDTC()">BORRAR</div>
+    </div>
+</div>
+
+<div id="guia" class="screen">
+    <button class="back-btn" onclick="nav('menu')">VOLVER</button>
+    <h3>Guía de Cables (Pinout)</h3>
+    
+    <div class="card">
+        <strong>BOBINA (P035x)</strong>
+        <div class="wire"><span class="dot" style="background:red;"></span>PIN 1: 12V (Fusible 32/34)</div>
+        <div class="wire"><span class="dot" style="background:brown;"></span>PIN 4: TIERRA</div>
+        <div class="wire">NOTA: Si fallan las 4, es el arnés flojo.</div>
+    </div>
+
+    <div class="card">
+        <strong>SENSOR ÁRBOL (P0343)</strong>
+        <div class="wire"><span class="dot" style="background:purple;"></span>PIN 2: SEÑAL (Debe oscilar)</div>
+        <div class="wire">NOTA: Limpiar virutas del imán.</div>
+    </div>
+
+    <div class="card">
+        <strong>SENSOR O2 (P0036)</strong>
+        <div class="wire"><span class="dot" style="background:white;"></span>Cables Blancos: Resistencia 3-10 Ohms</div>
+        <div class="wire">NOTA: Revisar cables quemados en escape.</div>
+    </div>
+</div>
+
+<div id="sensores" class="screen">
+    <button class="back-btn" onclick="detener(); nav('menu')">VOLVER</button>
+    <div style="text-align:center; font-size:2rem; font-weight:bold; color:#0f0; margin:20px 0;" id="valor-vivo">--</div>
+    <div style="text-align:center; color:#aaa; margin-bottom:20px;" id="lbl-vivo">Selecciona Sensor</div>
+    
+    <div class="grid" style="grid-template-columns:1fr 1fr 1fr;">
+        <div class="btn" onclick="ver('RPM')">RPM</div>
+        <div class="btn" onclick="ver('TPS')">TPS</div>
+        <div class="btn" onclick="ver('MAF')">MAF</div>
+        <div class="btn" onclick="ver('APP1')">APP1</div>
+        <div class="btn" onclick="ver('APP2')">APP2</div>
+        <div class="btn" onclick="ver('VOLT')">VOLT</div>
+    </div>
+</div>
+
+<div id="modal" onclick="this.style.display='none'">
+    <div id="modal-content">
+        <h2 id="m-code" style="color:#ffd700; margin-top:0;"></h2>
+        <p id="m-desc"></p>
+        <p style="color:#00ccff; font-weight:bold;">SOLUCIÓN:</p>
+        <p id="m-fix"></p>
+        <small style="color:#666;">(Toca para cerrar)</small>
+    </div>
+</div>
+
+<script>
+    // --- BIBLIOTECA DE CÓDIGOS ---
+    const DB = {
+        "P0036": {t:"Calefactor O2 Banco 1", f:"Revisar cables quemados en escape."},
+        "P0606": {t:"Falla PCM/ECU", f:"Causado por corto en O2 o tierras sucias."},
+        "P0343": {t:"Sensor Árbol Alto", f:"Limpiar VIRUTAS del imán. Sensor en corto."},
+        "P0351": {t:"Bobina A", f:"Revisar conector de bobina flojo."},
+        "P0352": {t:"Bobina B", f:"Revisar conector de bobina flojo."},
+        "P0353": {t:"Bobina C", f:"Revisar conector de bobina flojo."},
+        "P0354": {t:"Bobina D", f:"Revisar conector de bobina flojo."},
+        "P0300": {t:"Falla Múltiple", f:"Bujías, Cables, Bobina."},
+        "P2122": {t:"Pedal Bajo", f:"Falta tierra en pedal."}
+    };
+
+    function mostrarAyuda(code) {
+        let info = DB[code] || {t:"Desconocido", f:"Consultar manual."};
+        document.getElementById('m-code').innerText = code;
+        document.getElementById('m-desc').innerText = info.t;
+        document.getElementById('m-fix').innerText = info.f;
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    // --- SISTEMA BLUETOOTH ---
+    let char;
+    let timer;
+    let active = null;
+
+    function nav(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    async function conectar() {
+        try {
+            document.getElementById('status').innerText = "Buscando...";
+            let device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: ['e7810a71-73ae-499d-8c15-faa9aef0c3f2', '0000ffe0-0000-1000-8000-00805f9b34fb']
+            });
+            let server = await device.gatt.connect();
+            
+            // Intentar servicio Vgate o Genérico
+            let service;
+            try { service = await server.getPrimaryService('e7810a71-73ae-499d-8c15-faa9aef0c3f2'); char = await service.getCharacteristic('bef8d6c9-9c21-4c9e-b632-bd58c1009f9f'); }
+            catch(e) { service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb'); char = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb'); }
+
+            await char.startNotifications();
+            char.addEventListener('characteristicvaluechanged', procesarDatos);
+            
+            // Inicializar VW
+            await enviar("AT Z");
+            await enviar("AT SP 3"); // ISO 9141
+            await enviar("AT IIA 33");
+            await enviar("0100");
+            
+            document.getElementById('status').innerText = "CONECTADO";
+            document.getElementById('status').style.color = "#0f0";
+        } catch(e) {
+            alert("Error: " + e);
+            document.getElementById('status').innerText = "ERROR";
+        }
+    }
+
+    async function enviar(cmd) {
+        if(!char) return;
+        await char.writeValue(new TextEncoder().encode(cmd + "\r"));
+        await new Promise(r => setTimeout(r, 200));
+    }
+
+    function procesarDatos(event) {
+        let txt = new TextDecoder().decode(event.target.value).replace(/>/g,'').trim();
+        let hex = txt.replace(/\s/g,'');
+        
+        // LEER CÓDIGOS
+        if(hex.startsWith("43")) {
+            let html = "";
+            let found = false;
+            for(let i=2; i<hex.length; i+=4) {
+                let c = hex.substr(i,4);
+                if(c!=="0000" && c.length===4) {
+                    found=true;
+                    let p = "P"+c;
+                    html += `<div class='code-btn' onclick='mostrarAyuda("${p}")'>${p}</div>`;
+                }
+            }
+            document.getElementById('lista-codigos').innerHTML = found ? html : "Sin Fallas.";
+        }
+        
+        // SENSORES
+        if(active === 'RPM' && hex.includes("410C")) {
+            let val = parseInt(hex.substr(hex.indexOf("410C")+4, 4), 16) / 4;
+            document.getElementById('valor-vivo').innerText = Math.round(val);
+        }
+        if((active === 'TPS' || active==='APP1') && hex.includes("4111")) {
+            let val = parseInt(hex.substr(hex.indexOf("4111")+4, 2), 16) * 100 / 255;
+            document.getElementById('valor-vivo').innerText = Math.round(val) + "%";
+        }
+        if(active === 'APP2' && hex.includes("414A")) {
+             let val = parseInt(hex.substr(hex.indexOf("414A")+4, 2), 16) * 100 / 255;
+             document.getElementById('valor-vivo').innerText = Math.round(val) + "%";
+        }
+        if(active === 'VOLT' && txt.includes("V")) {
+            document.getElementById('valor-vivo').innerText = parseFloat(txt) + "V";
+        }
+    }
+
+    function ver(sensor) {
+        if(!char) return alert("Conecta primero");
+        clearInterval(timer);
+        active = sensor;
+        document.getElementById('lbl-vivo').innerText = sensor;
+        document.getElementById('valor-vivo').innerText = "...";
+        
+        let cmd = "0100";
+        if(sensor === 'RPM') cmd = "010C";
+        if(sensor === 'TPS') cmd = "0111";
+        if(sensor === 'APP1') cmd = "0111";
+        if(sensor === 'APP2') cmd = "014A";
+        if(sensor === 'VOLT') cmd = "AT RV";
+        
+        timer = setInterval(() => enviar(cmd), 600);
+    }
+    
+    function detener() { clearInterval(timer); }
+    async function leerDTC() { if(!char) return alert("Conecta"); document.getElementById('lista-
