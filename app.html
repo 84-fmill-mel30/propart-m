@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROPART OS | ACCESO MAESTRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon-blue: #00f3ff; --neon-purple: #bc13fe; --bg: #050505; }
+        body { background: var(--bg); color: white; font-family: 'Roboto Mono', monospace; margin: 0; padding-bottom: 80px; }
+        
+        /* PANTALLA DE BLOQUEO */
+        #lock-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999; display: none;
+            flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        .lock-icon { font-size: 50px; margin-bottom: 20px; }
+        
+        /* ESTILOS APP */
+        .top-bar { background: #001020; padding: 15px; border-bottom: 2px solid var(--neon-blue); display: flex; justify-content: space-between; }
+        .screen { display: none; padding: 20px; }
+        .screen.active { display: block; }
+        .data-card { background: #111; border-left: 4px solid var(--neon-purple); padding: 15px; margin-bottom: 15px; border-radius: 5px; }
+        .btn-tech { background: rgba(0, 243, 255, 0.1); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 15px; width: 100%; margin-top: 10px; font-family: 'Orbitron'; cursor: pointer; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 2px solid var(--neon-purple); display: flex; justify-content: space-around; padding: 10px 0; }
+        .nav-item { color: #555; font-size: 0.7rem; cursor: pointer; text-align: center; }
+        .nav-item.active { color: var(--neon-blue); }
+    </style>
+</head>
+<body>
+
+    <div id="lock-screen">
+        <div class="lock-icon">🔒</div>
+        <h2 style="font-family: 'Orbitron'; color: red;">ACCESO EXPIRADO</h2>
+        <p>Tu suscripción mensual ha terminado.</p>
+        <button class="btn-tech" style="border-color: #bc13fe; color: #bc13fe;" 
+                onclick="window.location.href='https://wa.me/527776838196?text=Hola%20Millán,%20quiero%20renovar%20mi%20acceso%20a%20PROPART.'">
+            RENOVAR ACCESO AQUÍ
+        </button>
+    </div>
+
+    <div id="main-content">
+        <div class="top-bar">
+            <div style="font-family:'Orbitron'; color: var(--neon-blue);">PROPART OS</div>
+            <div style="color: #0f0; font-size: 0.7rem;">● LICENCIA ACTIVA</div>
+        </div>
+
+        <div id="screen-home" class="screen active">
+            <h2 style="color: var(--neon-blue);">BÚSQUEDA DTC</h2>
+            <input type="text" style="width:90%; padding:15px; background:#000; color:white; border:1px solid var(--neon-blue);" placeholder="CÓDIGO P0000">
+            <button class="btn-tech">ESCANEANDO...</button>
+        </div>
+
+        <div id="screen-diesel" class="screen">
+            <h2 style="color: orange;">DIESEL HD</h2>
+            <div class="data-card"><b>CUMMINS ISX:</b> 4,000-6,000 PSI Ralentí</div>
+            <div class="data-card"><b>NAVISTAR DT466:</b> HEUI 800-1,200 PSI</div>
+        </div>
+
+        <div id="screen-immo" class="screen">
+            <h2 style="color: var(--neon-purple);">INMO & KEYS</h2>
+            <div class="data-card"><b>VW INMO 1:</b> Resoldar pines de caja blanca.</div>
+            <div class="data-card"><b>NISSAN NATS:</b> Revisar fusible 10A Electronics.</div>
+        </div>
+
+        <div id="screen-diag" class="screen">
+            <h2 style="color: lime;">DIAGRAMAS</h2>
+            <div class="data-card"><b>OBD2:</b> Pin 6/14 (CAN), Pin 16 (+12V), Pin 4/5 (GND).</div>
+        </div>
+
+        <div class="nav-bar">
+            <div class="nav-item active" onclick="showScreen('home', this)">SCAN</div>
+            <div class="nav-item" onclick="showScreen('diesel', this)">DIESEL</div>
+            <div class="nav-item" onclick="showScreen('immo', this)">INMO</div>
+            <div class="nav-item" onclick="showScreen('diag', this)">DIAG</div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONTROL DE FECHA (BLOQUEO) ---
+        function verificarAcceso() {
+            const fechaActual = new Date();
+            const mesActual = fechaActual.getMonth(); // 0 = Enero, 1 = Febrero...
+            const añoActual = fechaActual.getFullYear();
+
+            // AJUSTE: Si el mes es FEBRERO (1) o posterior, y el año es 2026, BLOQUEAR.
+            if (añoActual >= 2026 && mesActual >= 1) { 
+                document.getElementById('lock-screen').style.display = 'flex';
+                document.getElementById('main-content').style.display = 'none';
+            }
+        }
+
+        verificarAcceso(); // Ejecutar al abrir
+
+        function showScreen(id, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('screen-' + id).classList.add('active');
+            el.classList.add('active');
+        }
+    </script>
+</body>
+</html>
