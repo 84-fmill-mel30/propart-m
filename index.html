@@ -4,215 +4,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scanner V32 - SEGURO</title>
+    <title>Propart Diagnostic | Sistema Inteligente & Refacciones</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #121212; color: #fff; font-family: sans-serif; margin: 0; padding: 15px; user-select: none; }
-        h2 { border-bottom: 2px solid #ffd700; padding-bottom: 10px; color: #ffd700; text-align: center; }
+        /* --- ESTILO GENERAL (MODO DARK/ELEGANCE) --- */
+        :root {
+            --primary: #002060; /* Azul Marino Propart */
+            --accent: #00FFFF; /* Cyan Neón para Tech */
+            --danger: #FF0000; /* Rojo para alertas */
+            --whatsapp: #25D366;
+            --bg-dark: #0a0a0a;
+            --bg-light: #f4f4f4;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background: linear-gradient(180deg, #001020 0%, #002060 100%);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--accent);
+            box-shadow: 0 0 20px rgba(0, 32, 96, 0.8);
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            margin: 0;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
         
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 8px;
-            font-size: 1.1rem;
+        .subtitle {
+            font-style: italic;
+            color: #ccc;
+            margin-top: 5px;
+        }
+
+        /* --- HERO SECTION (LA OFERTA) --- */
+        .hero {
+            position: relative;
+            padding: 80px 20px;
+            text-align: center;
+            background: url('https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); /* Capa oscura */
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h2 {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px var(--accent);
+        }
+
+        .btn-download {
+            display: inline-block;
+            background-color: var(--accent);
+            color: var(--primary);
+            padding: 18px 50px;
+            font-size: 1.3rem;
             font-weight: bold;
-            cursor: pointer;
+            text-decoration: none;
+            border-radius: 50px;
+            margin-top: 30px;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px var(--accent);
+            text-transform: uppercase;
+        }
+
+        .btn-download:hover {
+            background-color: white;
+            transform: scale(1.05);
+            box-shadow: 0 0 40px white;
+        }
+
+        /* --- SECCIÓN JULSS AI --- */
+        .julss-section {
+            background: linear-gradient(90deg, #000 0%, #001133 100%);
+            padding: 50px 20px;
+            text-align: center;
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333;
+        }
+
+        .julss-avatar {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--primary);
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        /* --- TIENDA / REFACCIONARIA (FONDO CLARO) --- */
+        .store-section {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            padding: 60px 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            color: var(--primary);
+            font-size: 2.2rem;
+            margin-bottom: 40px;
+            font-weight: 700;
+        }
+
+        .shipping-alert {
+            background-color: #e3f2fd;
+            border-left: 5px solid #2196f3;
+            padding: 20px;
+            margin: 0 auto 40px auto;
+            max-width: 800px;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            border: 1px solid #ddd;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+        }
+
+        .card-img-placeholder {
+            height: 200px;
+            background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .card-body {
+            padding: 20px;
             text-align: center;
         }
-        .btn:active { background: #ffd700; color: #000; }
+
+        .price {
+            font-size: 1.5rem;
+            color: var(--danger);
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .btn-whatsapp {
+            display: block;
+            width: 100%;
+            padding: 12px 0;
+            background-color: var(--whatsapp);
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
         
-        .panel { display: none; background: #1e1e1e; padding: 15px; border-radius: 10px; border: 1px solid #444; margin-top: 20px; }
-        .panel.active { display: block; }
-        
-        .log-box { font-family: monospace; font-size: 0.8rem; color: #0f0; background: #000; padding: 10px; height: 100px; overflow-y: scroll; border: 1px solid #333; margin-top: 20px; }
-        
-        .code-item { background: #002244; color: #00ccff; padding: 10px; margin-bottom: 5px; border-radius: 5px; border-left: 4px solid #00ccff; }
+        .btn-whatsapp:hover {
+            background-color: #1ebc57;
+        }
+
+        .local-btn { background-color: var(--primary); }
+
+        /* --- FOOTER --- */
+        footer {
+            background-color: black;
+            color: #666;
+            text-align: center;
+            padding: 30px;
+            font-size: 0.9rem;
+        }
+
     </style>
 </head>
 <body>
 
-    <h2>PROPART MILLÁN V32</h2>
+    <header>
+        <h1>PROPART DIAGNOSTIC</h1>
+        <div class="subtitle">System Technology & AI | Morelos, MX</div>
+    </header>
 
-    <div id="main-menu">
-        <button class="btn" style="border-color:#0f0" onclick="iniciarConexion()">🔌 CONECTAR ESCÁNER</button>
-        <button class="btn" onclick="mostrarPanel('panel-manual')">📖 VER BIBLIOTECA DE FALLAS</button>
-        <button class="btn" onclick="mostrarPanel('panel-sensores')">📊 VER SENSORES EN VIVO</button>
-    </div>
+    <section class="hero">
+        <div class="hero-content">
+            <h2>TU TALLER, NIVEL DIOS.</h2>
+            <p style="font-size: 1.3rem;">Diagramas, Osciloscopio 3D, Diesel y Asistencia IA en tu bolsillo.</p>
+            
+            <div style="margin: 30px 0;">
+                <span style="background: rgba(0,255,255,0.2); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--accent); color: var(--accent);">
+                    🚀 VERSIÓN LIVE DISPONIBLE
+                </span>
+            </div>
 
-    <div id="panel-sensores" class="panel">
-        <button class="btn" style="background:#550000" onclick="volver()">X CERRAR</button>
-        <h3 style="text-align:center; color:#ffd700" id="live-display">--</h3>
-        <p style="text-align:center; color:#aaa;" id="live-label">Esperando dato...</p>
+            <a href="#" class="btn-download">DESCARGAR PRUEBA (3 DÍAS GRATIS)</a>
+            <p style="margin-top: 20px; opacity: 0.8;">Disponible para Android & PC</p>
+        </div>
+    </section>
+
+    <section class="julss-section">
+        <div class="julss-avatar">AI</div>
+        <h2 style="color: var(--accent); margin-top: 15px;">"OYE JULSS..."</h2>
+        <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto;">
+            No estás solo. Soy <strong>Julss</strong>, tu Asistente Especializado.
+            Pregúntame por pines de ECU, torque de cabezas o códigos de falla.
+            <br><br>
+            <em>"Julss, ¿cuál es el pin de inyectores del Jetta A4?"</em>
+        </p>
+    </section>
+
+    <section class="store-section">
+        <h2 class="section-title">🛒 REFACCIONARIA PROPART</h2>
         
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <button class="btn" onclick="pedir('RPM')">RPM</button>
-            <button class="btn" onclick="pedir('TPS')">TPS</button>
-            <button class="btn" onclick="pedir('MAF')">MAF</button>
-            <button class="btn" onclick="pedir('VOLT')">VOLT</button>
+        <div class="shipping-alert">
+            <p style="font-size: 1.1rem; color: var(--primary); font-weight: bold;">📍 ¿ESTÁS EN MORELOS?</p>
+            <p>Recoge en nuestra sucursal o entregas locales SIN COSTO EXTRA.</p>
+            <hr style="border: 0; border-top: 1px solid #bbdefb; margin: 10px 0;">
+            <p style="font-size: 0.9rem; color: #555;">📦 <strong>Envíos Nacionales:</strong> Costo extra por paquetería (FedEx/Castores/Correos). Cotizamos al momento.</p>
         </div>
-        
-        <br>
-        <button class="btn" style="border-color:#0f0" onclick="leerCodigos()">🔍 LEER CÓDIGOS</button>
-        <button class="btn" style="border-color:#f00" onclick="borrarCodigos()">🗑️ BORRAR CÓDIGOS</button>
-        <div id="dtc-result" style="margin-top:10px; color:#fff;"></div>
-    </div>
 
-    <div id="panel-manual" class="panel">
-        <button class="btn" style="background:#550000" onclick="volver()">X CERRAR</button>
-        <h3>Tus Soluciones:</h3>
-        
-        <div class="code-item">
-            <strong>P0036 (Sensor O2):</strong><br>
-            El cableado del sensor (abajo, después del catalizador) está quemado o trozado.
-        </div>
-        <div class="code-item">
-            <strong>P0343 (Sensor Árbol):</strong><br>
-            Señal Alta. Limpiar las virutas metálicas del imán del sensor CMP.
-        </div>
-        <div class="code-item">
-            <strong>P0606 (Computadora):</strong><br>
-            Error de procesador. Revisa que el alternador no cargue más de 15V y tierras de la ECU.
-        </div>
-        <div class="code-item">
-            <strong>P0351 - P0354 (Bobinas):</strong><br>
-            Falso contacto en el arnés principal de la bobina. Revisa pines doblados.
-        </div>
-    </div>
-
-    <div class="log-box" id="console">Sistema iniciado...</div>
-
-<script>
-    // --- LÓGICA ULTRA SEGURA ---
-    function log(msg) {
-        let c = document.getElementById('console');
-        c.innerHTML += "<div>> " + msg + "</div>";
-        c.scrollTop = c.scrollHeight;
-    }
-
-    function mostrarPanel(id) {
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        log("Abriendo panel: " + id);
-    }
-
-    function volver() {
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        log("Volviendo al menú");
-        detener();
-    }
-
-    // --- BLUETOOTH ---
-    let device, server, service, char, timer;
-    const SVC_UUID = '0000ffe0-0000-1000-8000-00805f9b34fb'; // Genérico común
-    const CHR_UUID = '0000ffe1-0000-1000-8000-00805f9b34fb'; 
-
-    async function iniciarConexion() {
-        try {
-            log("Solicitando Bluetooth...");
-            device = await navigator.bluetooth.requestDevice({
-                acceptAllDevices: true,
-                optionalServices: [SVC_UUID, 'e7810a71-73ae-499d-8c15-faa9aef0c3f2']
-            });
-
-            log("Conectando...");
-            server = await device.gatt.connect();
+        <div class="grid-container">
             
-            // Intento 1: Genérico (Más común en ELM327 chinos)
-            try {
-                service = await server.getPrimaryService(SVC_UUID);
-                char = await service.getCharacteristic(CHR_UUID);
-            } catch (e) {
-                // Intento 2: Vgate
-                service = await server.getPrimaryService('e7810a71-73ae-499d-8c15-faa9aef0c3f2');
-                char = await service.getCharacteristic('bef8d6c9-9c21-4c9e-b632-bd58c1009f9f');
-            }
+            <div class="card">
+                <div class="card-img-placeholder">
+                    [FOTO ALTERNADOR]
+                </div>
+                <div class="card-body">
+                    <h3 style="color: var(--primary);">Alternadores y Marchas</h3>
+                    <p>Bosch, Valeo, Hitachi. Nuevos y reconstruidos. Garantizados.</p>
+                    <div class="price">Desde $1,800</div>
+                    <a href="https://wa.me/521XXXXXXXXXX?text=Hola%20Millan,%20me%20interesa%20un%20Alternador.%20Soy%20de%20[TU_CIUDAD],%20cotizame%20con%20envio." class="btn-whatsapp">
+                        🚚 COTIZAR CON ENVÍO
+                    </a>
+                </div>
+            </div>
 
-            await char.startNotifications();
-            char.addEventListener('characteristicvaluechanged', recibirDatos);
-            
-            log("✅ CONECTADO");
-            log("Iniciando VW...");
-            
-            await enviar("AT Z");
-            await enviar("AT SP 3"); // Golf A4 usa Protocolo 3
-            await enviar("AT IIA 33");
-            await enviar("0100"); // Despertar
-            
-            mostrarPanel('panel-sensores');
+            <div class="card">
+                <div class="card-img-placeholder">
+                    [FOTO SENSORES]
+                </div>
+                <div class="card-body">
+                    <h3 style="color: var(--primary);">Sensores (CKP, CMP, MAF)</h3>
+                    <p>Para VW, Nissan, Chevrolet. Calidad OEM. Detectados por Julss.</p>
+                    <div class="price">Desde $450</div>
+                    <a href="https://wa.me/521XXXXXXXXXX?text=Hola%20Millan,%20necesito%20un%20Sensor.%20Paso%20a%20recoger%20en%20tienda." class="btn-whatsapp local-btn">
+                        🏪 RECOGER EN TIENDA
+                    </a>
+                </div>
+            </div>
 
-        } catch (err) {
-            log("❌ ERROR: " + err);
-            alert("No se pudo conectar: " + err);
-        }
-    }
+            <div class="card">
+                <div class="card-img-placeholder">
+                    [FOTO COMPUTADORAS]
+                </div>
+                <div class="card-body">
+                    <h3 style="color: var(--primary);">Computadoras & Módulos</h3>
+                    <p>Venta, Clonación y Reprogramación Diesel/Gasolina.</p>
+                    <div class="price">Cotizar Servicio</div>
+                    <a href="https://wa.me/521XXXXXXXXXX?text=Hola%20Millan,%20tengo%20una%20computadora%20dañada,%20necesito%20reparacion%20o%20cambio." class="btn-whatsapp">
+                        🔧 COTIZAR SERVICIO
+                    </a>
+                </div>
+            </div>
 
-    async function enviar(cmd) {
-        if (!char) return;
-        await char.writeValue(new TextEncoder().encode(cmd + "\r"));
-        // Pequeña pausa para no saturar
-        await new Promise(r => setTimeout(r, 200));
-    }
+        </div>
 
-    function recibirDatos(event) {
-        let text = new TextDecoder().decode(event.target.value).replace(/>/g,'').trim();
-        let hex = text.replace(/\s/g, '');
+        <div style="text-align: center; margin-top: 50px;">
+            <p style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">¿No encuentras la pieza?</p>
+            <p>Tómale una foto a la pieza dañada y mándamela.</p>
+            <a href="https://wa.me/521XXXXXXXXXX?text=Hola,%20te%20mando%20foto%20de%20la%20pieza%20que%20necesito%20para%20que%20me%20la%20consigas." class="btn-download" style="font-size: 1rem; padding: 15px 30px;">
+                📷 MANDAR FOTO DE MUESTRA
+            </a>
+        </div>
+    </section>
 
-        // DETECTAR CÓDIGOS
-        if(hex.startsWith("43")) {
-            let res = "";
-            for(let i=2; i<hex.length; i+=4) {
-                let code = hex.substr(i,4);
-                if(code !== "0000") res += "P" + code + " ";
-            }
-            document.getElementById('dtc-result').innerText = res || "Sin fallas";
-            log("Códigos: " + res);
-        }
+    <footer>
+        <p>© 2026 PROPART DIAGNOSTIC. Desarrollado por Millán & Julss Systems.</p>
+        <p>Xochitepec, Morelos, México.</p>
+    </footer>
 
-        // DETECTAR SENSORES
-        if(hex.includes("410C")) { // RPM
-             let val = parseInt(hex.substr(hex.indexOf("410C")+4, 4), 16) / 4;
-             document.getElementById('live-display').innerText = Math.round(val) + " RPM";
-        }
-        if(hex.includes("4111")) { // TPS
-             let val = parseInt(hex.substr(hex.indexOf("4111")+4, 2), 16) * 100 / 255;
-             document.getElementById('live-display').innerText = Math.round(val) + " %";
-        }
-        if(text.includes("V") && text.length < 10) { // Voltaje
-            document.getElementById('live-display').innerText = text;
-        }
-    }
-
-    // --- COMANDOS ---
-    function pedir(tipo) {
-        detener();
-        document.getElementById('live-label').innerText = "Leyendo " + tipo + "...";
-        let cmd = "0100";
-        if(tipo === 'RPM') cmd = "010C";
-        if(tipo === 'TPS') cmd = "0111"; // TPS estándar
-        if(tipo === 'MAF') cmd = "0110";
-        if(tipo === 'VOLT') cmd = "AT RV";
-
-        timer = setInterval(() => enviar(cmd), 500); // Medio segundo
-    }
-
-    async function leerCodigos() {
-        detener();
-        document.getElementById('dtc-result').innerText = "Escaneando...";
-        await enviar("03");
-    }
-
-    async function borrarCodigos() {
-        if(confirm("¿Borrar?")) await enviar("04");
-    }
-
-    function detener() {
-        clearInterval(timer);
-    }
-
-</script>
 </body>
 </html>
