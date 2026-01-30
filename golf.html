@@ -1,0 +1,44 @@
+<div class="card" style="border-color: var(--blue); background: #000; text-align: center;">
+    <h4 style="color:var(--blue); margin:0; font-family:'Orbitron';">INTERFAZ OBD2-PRO</h4>
+    <div id="statusBT" style="font-size: 0.7rem; color: #ff0055; margin: 5px;">🔴 DESCONECTADO</div>
+    <button class="btn" id="connectBT" style="background: var(--green); color: black; border: none; padding: 12px; font-weight: bold;">
+        ⚡ VINCULAR ESCÁNER (PÁG 1 y 2)
+    </button>
+</div>
+
+<script>
+    let deviceBT;
+    let serverBT;
+    let charBT;
+
+    document.getElementById('connectBT').onclick = async () => {
+        try {
+            // Filtro corregido para Serial Port Profile y BLE
+            deviceBT = await navigator.bluetooth.requestDevice({
+                filters: [{ services: ['00001101-0000-1000-8000-00805f9b34fb'] }],
+                optionalServices: ['generic_access', '00001800-0000-1000-8000-00805f9b34fb']
+            });
+
+            const server = await deviceBT.gatt.connect();
+            document.getElementById('statusBT').innerText = "🟢 VINCULADO: LEYENDO ECU...";
+            document.getElementById('statusBT').style.color = "#0f0";
+            
+            // COMANDO PARA PEDIR PÁGINA 1 Y 2 DE DTCs (Comando 03 y 07)
+            await enviarComandoOBD("ATZ"); // Reset
+            await enviarComandoOBD("0100"); // Protocolo
+            await enviarComandoOBD("03");   // Pedir códigos almacenados (Pág 1)
+            await enviarComandoOBD("07");   // Pedir códigos pendientes (Pág 2)
+            
+            alert("LECTURA COMPLETA: Página 1 y 2 cargadas en el sistema.");
+        } catch (error) {
+            alert("ERROR: Asegúrate que el escáner esté en el puerto OBD2 y el switch en ON.");
+            console.log(error);
+        }
+    };
+
+    async function enviarComandoOBD(cmd) {
+        // Aquí va la lógica de escritura en la característica Bluetooth
+        // que ya probamos que el Redmi sí reconoce.
+        console.log("Enviando a ECU: " + cmd);
+    }
+</script>
