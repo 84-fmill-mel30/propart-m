@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PROPART | V32 MASTER</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <title>PROPART V32 | MASTER</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Roboto+Mono&display=swap" rel="stylesheet">
     <style>
         :root { --blue: #00f3ff; --purple: #bc13fe; --dark: #000; --green: #0f0; --red: #ff0055; }
-        body { background: var(--dark); color: white; font-family: 'Roboto Mono', monospace; margin: 0; padding-bottom: 90px; overflow-x: hidden; }
+        body { background: var(--dark); color: white; font-family: 'Roboto Mono', monospace; margin: 0; padding-bottom: 90px; }
         .top-bar { background: #111; padding: 15px; border-bottom: 2px solid var(--blue); text-align: center; box-shadow: 0 0 15px var(--blue); }
         .screen { display: none; padding: 20px; animation: fadeIn 0.3s; }
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .card { background: #111; border: 1px solid #333; border-left: 4px solid var(--purple); padding: 15px; margin-top: 15px; border-radius: 5px; }
-        .btn { background: var(--blue); color: #000; border: none; padding: 15px; width: 100%; font-family: 'Orbitron'; font-weight: bold; margin-top: 10px; border-radius: 5px; cursor: pointer; }
+        .btn { background: var(--blue); color: #000; border: none; padding: 15px; width: 100%; font-family: 'Orbitron'; font-weight: bold; margin-top: 10px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        .btn:active { transform: scale(0.95); opacity: 0.8; }
         .nav { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 2px solid var(--purple); display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
         .nav-item { color: #555; font-size: 0.7rem; text-align: center; flex: 1; cursor: pointer; }
         .nav-item.active { color: var(--blue); text-shadow: 0 0 10px var(--blue); font-weight: bold; }
@@ -23,15 +24,16 @@
 <body>
 
     <div class="top-bar">
-        <div style="font-family:'Orbitron'; color:var(--blue); font-weight: 900;">PROPART V32 MASTER</div>
+        <div id="headerTitle" style="font-family:'Orbitron'; color:var(--blue); font-weight: 900;">PROPART V32 MASTER</div>
     </div>
 
     <div id="repair" class="screen active">
+        <button class="btn" onclick="conectarBT()" style="background:var(--green); box-shadow: 0 0 15px var(--green); margin-bottom: 10px;">🔗 VINCULAR ESCÁNER OBD2</button>
+        
         <div class="card" style="border-left-color: var(--blue);">
             <h3 style="margin:0; color:var(--blue); font-family:'Orbitron';">REPARACIÓN RÁPIDA</h3>
-            <p style="font-size: 0.7rem; color: #888; margin-bottom: 10px;">Ingresa código de falla (Ej: P0300)</p>
-            <input type="text" id="dtcInput" placeholder="P0000">
-            <button class="btn" onclick="buscarRep()">ANALIZAR CON JULSS AI</button>
+            <input type="text" id="dtcInput" placeholder="INGRESA P0300">
+            <button class="btn" onclick="buscarRep()">ANALIZAR CÓDIGO</button>
         </div>
 
         <div id="resBox" style="display:none;">
@@ -39,7 +41,7 @@
                 <h4 id="rNom" style="color:var(--blue); margin:0;"></h4>
                 <p id="rDef" style="font-size:0.85rem; color: #ccc;"></p>
                 <div style="background: #222; padding: 10px; border: 1px solid var(--green); border-radius: 5px;">
-                    <b style="color:var(--green);">PROCEDIMIENTO:</b><br>
+                    <b style="color:var(--green);">SOLUCIÓN:</b><br>
                     <span id="rSol" style="font-size:0.85rem;"></span>
                 </div>
             </div>
@@ -47,19 +49,16 @@
     </div>
 
     <div id="manual" class="screen">
-        <h3 style="color:var(--blue); font-family:'Orbitron';">DATOS TÉCNICOS GOLF</h3>
+        <h3 style="color:var(--blue); font-family:'Orbitron';">GOLF TÉCNICO</h3>
         <div class="card">
-            <b style="color:var(--red);">PINOUT ECU (MOTRONIC):</b><br>
-            • Pin 1 & 2: Masa (-)<br>
-            • Pin 3: +12V Constante<br>
-            • Pin 62: +12V Ignición<br>
-            • Pin 43: Línea K Comunicación
+            <b style="color:var(--red);">PINOUT ECU GOLF:</b><br>
+            • Pin 1: Tierra | Pin 3: +12V Bat<br>
+            • Pin 62: +12V Sw | Pin 43: K-Line
         </div>
         <div class="card">
-            <b style="color:var(--purple);">SISTEMA DE ENCENDIDO:</b><br>
-            • Resistencia Inyector: 12 - 16 Ω<br>
-            • Pulso Ralentí: 2.2ms - 3.5ms<br>
-            • Bobina: Señal cuadrada de 5V
+            <b style="color:var(--purple);">SENSORES VALORES:</b><br>
+            • Inyector: 12-16 Ohms<br>
+            • MAF: 0.5V - 4.5V (Señal)
         </div>
     </div>
 
@@ -77,10 +76,24 @@
             el.classList.add('active');
         }
 
+        // --- CONEXIÓN BLUETOOTH ---
+        async function conectarBT() {
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['00001101-0000-1000-8000-00805f9b34fb']
+                });
+                const server = await device.gatt.connect();
+                alert("✅ ESCÁNER CONECTADO: " + device.name);
+                document.getElementById('headerTitle').style.color = "var(--green)";
+            } catch (err) {
+                alert("Socio: Activa Bluetooth y GPS. Si es iPhone usa 'Bluefy'.");
+            }
+        }
+
         const dataRep = {
-            "P0300": { n: "MISFIRE ALEATORIO", d: "Falla de combustión en cilindros.", s: "Revisar presión de gasolina (45 PSI). Checar que las bobinas no tengan fuga de chispa. Medir pulso de inyección." },
-            "P0101": { n: "FALLA SENSOR MAF", d: "Señal de aire fuera de rango.", s: "Limpiar MAF con solvente seco. Revisar manguera de admisión rota después del sensor." },
-            "P0335": { n: "SENSOR CIGÜEÑAL (CKP)", d: "Pérdida de señal de rotación.", s: "Verificar resistencia (800-1200 ohms). Revisar cableado quemado cerca del escape." }
+            "P0300": { n: "MISFIRE ALEATORIO", d: "Falla de encendido múltiple.", s: "Revisar presión de combustible y estado de bobinas/bujías." },
+            "P0101": { n: "FALLA MAF", d: "Rango de señal fuera de lógica.", s: "Limpiar sensor MAF o revisar fugas de vacío." }
         };
 
         function buscarRep() {
@@ -91,9 +104,7 @@
                 document.getElementById('rNom').innerText = cod + ": " + dataRep[cod].n;
                 document.getElementById('rDef').innerText = dataRep[cod].d;
                 document.getElementById('rSol').innerText = dataRep[cod].s;
-            } else {
-                alert("JULSS AI: Código no encontrado. Contactando soporte...");
-            }
+            } else { alert("Código no encontrado. Contactando a Julss..."); }
         }
     </script>
 </body>
