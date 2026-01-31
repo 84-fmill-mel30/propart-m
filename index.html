@@ -91,10 +91,32 @@
             }
         }
 
-        const dataRep = {
-            "P0300": { n: "MISFIRE ALEATORIO", d: "Falla de encendido múltiple.", s: "Revisar presión de combustible y estado de bobinas/bujías." },
-            "P0101": { n: "FALLA MAF", d: "Rango de señal fuera de lógica.", s: "Limpiar sensor MAF o revisar fugas de vacío." }
+          const dataRep = {
+            // FALLAS DE MOTOR GOLF / VAG
+            "P0300": { n: "MISFIRE ALEATORIO", d: "Falla de encendido múltiple.", s: "Revisar presión de combustible (45 PSI) y fugas de chispa en cables/bobinas." },
+            "P0301": { n: "MISFIRE CILINDRO 1", d: "Falla detectada en el cilindro 1.", s: "Intercambia la bobina del 1 al 2. Si la falla se mueve al 2, la bobina no sirve." },
+            "P0101": { n: "FALLA MAF", d: "Señal de aire fuera de rango.", s: "Limpiar sensor con spray seco. Revisar que no esté rota la manguera del filtro." },
+            "P0420": { n: "CATALIZADOR (BANCO 1)", d: "Baja eficiencia del convertidor.", s: "Revisar fugas de escape. Si la sonda 2 oscila igual que la 1, el catalizador murió." },
+            "P0171": { n: "MEZCLA POBRE (SISTEMA LEAN)", d: "Mucha entrada de aire o poca gasolina.", s: "Busca fugas de vacío (mangueras rotas) o filtro de gasolina tapado." },
+            "P0335": { n: "SENSOR CIGÜEÑAL (CKP)", d: "Pérdida de señal de rotación.", s: "Verificar resistencia (800-1200 Ω). La Golf no prende si este sensor falla." },
+            "P0507": { n: "RALENTÍ ALTO (IAC/EPC)", d: "RPM más altas de lo normal.", s: "Limpiar cuerpo de aceleración y hacer AJUSTE BÁSICO (Canal 060)." },
+            "P0113": { n: "SENSOR IAT (TEMPERATURA AIRE)", d: "Voltaje alto en sensor de entrada.", s: "Revisar que el conector del MAF esté bien puesto (el IAT va integrado)." },
+            "P1297": { n: "CAÍDA DE PRESIÓN TURBO/MARIPOSA", d: "Fuga entre turbo y cuerpo acel.", s: "Revisar mangueras del Intercooler y válvula Diverter (en motores 1.8T)." }
         };
+
+        function buscarRep() {
+            const cod = document.getElementById('dtcInput').value.toUpperCase();
+            const box = document.getElementById('resBox');
+            if(dataRep[cod]) {
+                box.style.display = 'block';
+                document.getElementById('rNom').innerText = cod + ": " + dataRep[cod].n;
+                document.getElementById('rDef').innerText = dataRep[cod].d;
+                document.getElementById('rSol').innerText = "PASOS: " + dataRep[cod].s;
+            } else {
+                // CORRECCIÓN DE WHATSAPP: Ahora pide Soporte, no alternador
+                window.location.href = "https://wa.me/527776838196?text=Socio, necesito soporte con el codigo " + cod;
+            }
+        }
 
         function buscarRep() {
             const cod = document.getElementById('dtcInput').value.toUpperCase();
