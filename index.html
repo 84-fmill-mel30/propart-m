@@ -1,71 +1,100 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PROPART V32 | MASTER</title>
+    <title>PROPART V32 | MASTER GOLF</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Roboto+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --blue: #00f3ff; --purple: #bc13fe; --dark: #000; --green: #0f0; --red: #ff0055; }
-        body { background: var(--dark); color: white; font-family: 'Roboto Mono', monospace; margin: 0; padding-bottom: 90px; }
-        .top-bar { background: #111; padding: 15px; border-bottom: 2px solid var(--blue); text-align: center; box-shadow: 0 0 15px var(--blue); }
-        .screen { display: none; padding: 20px; animation: fadeIn 0.3s; }
+        :root { --blue: #00f3ff; --purple: #bc13fe; --dark: #000; --green: #0f0; --red: #ff0055; --gray: #222; }
+        body { background: var(--dark); color: white; font-family: 'Roboto Mono', monospace; margin: 0; padding-bottom: 90px; overflow-x: hidden; }
+        .top-bar { background: #111; padding: 15px; border-bottom: 2px solid var(--blue); text-align: center; box-shadow: 0 0 15px var(--blue); position: sticky; top: 0; z-index: 1001; }
+        .screen { display: none; padding: 20px; animation: fadeIn 0.4s ease-in-out; }
         .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .card { background: #111; border: 1px solid #333; border-left: 4px solid var(--purple); padding: 15px; margin-top: 15px; border-radius: 5px; }
-        .btn { background: var(--blue); color: #000; border: none; padding: 15px; width: 100%; font-family: 'Orbitron'; font-weight: bold; margin-top: 10px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
-        .btn:active { transform: scale(0.95); opacity: 0.8; }
-        .nav { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 2px solid var(--purple); display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
-        .nav-item { color: #555; font-size: 0.7rem; text-align: center; flex: 1; cursor: pointer; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: #111; border: 1px solid #333; border-left: 4px solid var(--purple); padding: 15px; margin-top: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .btn { background: var(--blue); color: #000; border: none; padding: 15px; width: 100%; font-family: 'Orbitron'; font-weight: bold; margin-top: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .btn:active { transform: scale(0.96); opacity: 0.8; }
+        .nav { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 2px solid var(--purple); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; box-shadow: 0 -5px 15px rgba(0,0,0,0.8); }
+        .nav-item { color: #555; font-size: 0.7rem; text-align: center; flex: 1; cursor: pointer; transition: 0.3s; }
         .nav-item.active { color: var(--blue); text-shadow: 0 0 10px var(--blue); font-weight: bold; }
-        input { width: 100%; padding: 15px; background: #000; color: var(--blue); border: 1px solid var(--blue); font-family: 'Orbitron'; text-align: center; box-sizing: border-box; font-size: 1.1rem; }
+        input { width: 100%; padding: 15px; background: #050505; color: var(--blue); border: 1px solid var(--blue); font-family: 'Orbitron'; text-align: center; box-sizing: border-box; font-size: 1.2rem; border-radius: 8px; }
+        video { width: 100%; border-radius: 10px; margin-top: 10px; border: 2px solid var(--red); display: none; background: #000; }
+        .graph-mini { background: #050505; height: 60px; border: 1px solid #222; margin-top: 8px; border-radius: 4px; overflow: hidden; }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
-        <div id="headerTitle" style="font-family:'Orbitron'; color:var(--blue); font-weight: 900;">PROPART V32 MASTER</div>
+        <div id="mainStatus" style="font-family:'Orbitron'; color:var(--blue); font-weight: 900; letter-spacing: 1.5px;">PROPART V32 MASTER</div>
     </div>
 
-    <div id="repair" class="screen active">
-        <button class="btn" onclick="conectarBT()" style="background:var(--green); box-shadow: 0 0 15px var(--green); margin-bottom: 10px;">🔗 VINCULAR ESCÁNER OBD2</button>
+    <div id="scan" class="screen active">
+        <button class="btn" onclick="conectarBT()" style="background:var(--green); box-shadow: 0 0 20px rgba(0,255,0,0.4); margin-bottom: 10px; height: 60px; font-size: 1rem;">🔗 VINCULAR SCANNER OBD2</button>
         
         <div class="card" style="border-left-color: var(--blue);">
-            <h3 style="margin:0; color:var(--blue); font-family:'Orbitron';">REPARACIÓN RÁPIDA</h3>
-            <input type="text" id="dtcInput" placeholder="INGRESA P0300">
-            <button class="btn" onclick="buscarRep()">ANALIZAR CÓDIGO</button>
+            <h3 style="margin:0; color:var(--blue); font-family:'Orbitron'; font-size: 1rem;">DIAGNÓSTICO POR CÓDIGO</h3>
+            <input type="text" id="dtcInput" placeholder="EJ: P0300" style="margin-top: 15px;">
+            <button class="btn" onclick="buscarDTC()">ANALIZAR FALLA</button>
         </div>
 
         <div id="resBox" style="display:none;">
             <div class="card" style="border-left-color: var(--green);">
-                <h4 id="rNom" style="color:var(--blue); margin:0;"></h4>
-                <p id="rDef" style="font-size:0.85rem; color: #ccc;"></p>
-                <div style="background: #222; padding: 10px; border: 1px solid var(--green); border-radius: 5px;">
-                    <b style="color:var(--green);">SOLUCIÓN:</b><br>
+                <h4 id="rNom" style="color:var(--blue); margin:0; font-family:'Orbitron'; text-transform: uppercase;"></h4>
+                <p id="rDef" style="font-size:0.85rem; color: #ccc; line-height: 1.4;"></p>
+                <div style="background: #1a1a1a; padding: 12px; border: 1px solid var(--green); border-radius: 6px; margin-top: 10px;">
+                    <b style="color:var(--green); font-size: 0.75rem;">SOLUCIÓN TÉCNICA JULSS:</b><br>
                     <span id="rSol" style="font-size:0.85rem;"></span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="manual" class="screen">
-        <h3 style="color:var(--blue); font-family:'Orbitron';">GOLF TÉCNICO</h3>
+    <div id="data" class="screen">
+        <h3 style="color:var(--blue); font-family:'Orbitron'; margin-bottom: 5px;">GOLF DATA MASTER</h3>
+        
         <div class="card">
-            <b style="color:var(--red);">PINOUT ECU GOLF:</b><br>
-            • Pin 1: Tierra | Pin 3: +12V Bat<br>
-            • Pin 62: +12V Sw | Pin 43: K-Line
+            <b style="color:var(--red);">ECU PINOUT (MOTRONIC):</b><br>
+            <span style="font-size: 0.85rem;">
+                • Pin 1-2: Masa (-) <br>
+                • Pin 3: +12V Constante <br>
+                • Pin 62: +12V Ignición <br>
+                • Pin 43: K-Line (Comms)
+            </span>
         </div>
-        <div class="card">
-            <b style="color:var(--purple);">SENSORES VALORES:</b><br>
-            • Inyector: 12-16 Ohms<br>
-            • MAF: 0.5V - 4.5V (Señal)
+
+        <div class="card" style="border-left-color: var(--green);">
+            <b style="color:var(--green);">PULSO DE INYECCIÓN (Ideal):</b><br>
+            <span style="font-size: 0.8rem;">Ralentí: 2.2ms - 3.5ms</span>
+            <div class="graph-mini">
+                <svg viewBox="0 0 100 30" width="100%" height="100%"><path d="M0 25 L20 25 L20 10 L25 10 L25 25 L100 25" stroke="lime" fill="none" stroke-width="2"><animate attributeName="d" dur="0.8s" repeatCount="indefinite" values="M0 25 L20 25 L20 10 L25 10 L25 25 L100 25; M0 25 L40 25 L40 10 L45 10 L45 25 L100 25; M0 25 L20 25 L20 10 L25 10 L25 25 L100 25"/></path></svg>
+            </div>
+        </div>
+
+        <div class="card" style="border-left-color: var(--blue);">
+            <b style="color:var(--blue);">SONDA LAMBDA (Ciclo):</b><br>
+            <span style="font-size: 0.8rem;">Oscilación: 0.1V a 0.9V</span>
+            <div class="graph-mini">
+                <svg viewBox="0 0 100 30" width="100%" height="100%"><path d="M0 15 Q 10 5, 20 15 T 40 15 T 60 15 T 80 15 T 100 15" stroke="cyan" fill="none" stroke-width="2"><animate attributeName="d" dur="1.5s" repeatCount="indefinite" values="M0 15 Q 10 5, 20 15 T 40 15 T 60 15 T 80 15 T 100 15; M0 15 Q 10 25, 20 15 T 40 15 T 60 15 T 80 15 T 100 15; M0 15 Q 10 5, 20 15 T 40 15 T 60 15 T 80 15 T 100 15"/></path></svg>
+            </div>
+        </div>
+    </div>
+
+    <div id="auditor" class="screen">
+        <h3 style="color:var(--blue); font-family:'Orbitron';">AUDITOR VISUAL</h3>
+        <div class="card" style="text-align: center;">
+            <p style="font-size: 0.75rem; color: #888;">Inspección de fugas y arneses en vivo:</p>
+            <video id="webcam" autoplay playsinline></video>
+            <button class="btn" id="btnCam" onclick="toggleCam()" style="background:var(--red);">📷 ENCENDER CÁMARA</button>
         </div>
     </div>
 
     <nav class="nav">
-        <div class="nav-item active" onclick="tab('repair', this)">SOLUCIÓN</div>
-        <div class="nav-item" onclick="tab('manual', this)">GOLF DATA</div>
-        <div class="nav-item" onclick="window.location.href='https://wa.me/527776838196'">JULSS AI</div>
+        <div class="nav-item active" onclick="tab('scan', this)">SCANNER</div>
+        <div class="nav-item" onclick="tab('data', this)">GOLF DATA</div>
+        <div class="nav-item" onclick="tab('auditor', this)">AUDITOR</div>
+        <div class="nav-item" onclick="irWhatsApp()">SOPORTE</div>
     </nav>
 
     <script>
@@ -76,69 +105,18 @@
             el.classList.add('active');
         }
 
-        // --- CONEXIÓN BLUETOOTH ---
         async function conectarBT() {
             try {
                 const device = await navigator.bluetooth.requestDevice({
                     acceptAllDevices: true,
                     optionalServices: ['00001101-0000-1000-8000-00805f9b34fb']
                 });
-                const server = await device.gatt.connect();
+                await device.gatt.connect();
                 alert("✅ ESCÁNER CONECTADO: " + device.name);
-                document.getElementById('headerTitle').style.color = "var(--green)";
+                document.getElementById('mainStatus').style.color = "var(--green)";
             } catch (err) {
                 alert("Socio: Activa Bluetooth y GPS. Si es iPhone usa 'Bluefy'.");
             }
         }
 
-        const dataRep = {
-            "P0300": { n: "MISFIRE ALEATORIO", d: "Múltiples cilindros fallando.", s: "Revisar presión de combustible (45 PSI). Checar bobinas y cables." },
-            "P0301": { n: "MISFIRE CILINDRO 1", d: "Falla en el cilindro 1.", s: "Intercambia bobina del 1 al 2 para descartar." },
-            "P0101": { n: "FALLA SENSOR MAF", d: "Señal de aire fuera de rango.", s: "Limpiar MAF. Revisar mangueras de vacío rotas." },
-            "P0171": { n: "SISTEMA POBRE (LEAN)", d: "Mucha entrada de aire.", s: "Buscar fugas de vacío o filtro de gasolina tapado." },
-            "P0420": { n: "CATALIZADOR (BANCO 1)", d: "Baja eficiencia detectada.", s: "Revisar fugas de escape antes de cambiar catalizador." },
-            "P0335": { n: "SENSOR CIGÜEÑAL (CKP)", d: "Sin señal de rotación.", s: "Verificar resistencia (800-1200 Ω). Arnés suele quemarse." }
-        };
-
-        function buscarRep() {
-            const cod = document.getElementById('dtcInput').value.toUpperCase();
-            const box = document.getElementById('resBox');
-            
-            if(dataRep[cod]) {
-                box.style.display = 'block';
-                document.getElementById('rNom').innerText = cod + ": " + dataRep[cod].n;
-                document.getElementById('rDef').innerText = dataRep[cod].d;
-                document.getElementById('rSol').innerText = "PASOS: " + dataRep[cod].s;
-            } else {
-                // REDIRECCIÓN A SOPORTE TÉCNICO
-                const msg = encodeURIComponent("Socio, necesito soporte con el código " + cod + " en una Golf.");
-                window.location.href = "https://wa.me/527776838196?text=" + msg;
-            }
-
-        function buscarRep() {
-            const cod = document.getElementById('dtcInput').value.toUpperCase();
-            const box = document.getElementById('resBox');
-            if(dataRep[cod]) {
-                box.style.display = 'block';
-                document.getElementById('rNom').innerText = cod + ": " + dataRep[cod].n;
-                document.getElementById('rDef').innerText = dataRep[cod].d;
-                document.getElementById('rSol').innerText = "PASOS: " + dataRep[cod].s;
-            } else {
-                // CORRECCIÓN DE WHATSAPP: Ahora pide Soporte, no alternador
-                window.location.href = "https://wa.me/527776838196?text=Socio, necesito soporte con el codigo " + cod;
-            }
-        }
-
-        function buscarRep() {
-            const cod = document.getElementById('dtcInput').value.toUpperCase();
-            const box = document.getElementById('resBox');
-            if(dataRep[cod]) {
-                box.style.display = 'block';
-                document.getElementById('rNom').innerText = cod + ": " + dataRep[cod].n;
-                document.getElementById('rDef').innerText = dataRep[cod].d;
-                document.getElementById('rSol').innerText = dataRep[cod].s;
-            } else { alert("Código no encontrado. Contactando a Julss..."); }
-        }
-    </script>
-</body>
-</html>
+        const base
