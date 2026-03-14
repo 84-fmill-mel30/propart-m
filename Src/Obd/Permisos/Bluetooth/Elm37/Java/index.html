@@ -1,0 +1,87 @@
+<script>
+// ── PARTICLES ──
+const stage = document.getElementById('particles');
+for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 3 + 1;
+    p.style.cssText = `
+        width:${size}px;height:${size}px;
+        left:${Math.random() * 100}%;
+        background:${Math.random() > .7 ? '#F5A623' : '#00D4FF'};
+        opacity:${Math.random() * .4 + .1};
+        animation-duration:${8 + Math.random() * 12}s;
+        animation-delay:${Math.random() * 8}s;
+    `;
+    stage.appendChild(p);
+}
+
+// ── SLIDE ENGINE PROPART V7 (CORREGIDO) ──
+const slides = document.querySelectorAll('.slide');
+let current = 0;
+let timer = null;
+const TIMING = [5000, 8000, 6000, 7000, 9000, 7000, 8000, 0];
+
+function showSlide(n) {
+    // 1. Limpiamos slides anteriores
+    slides.forEach(s => {
+        s.classList.remove('active', 'out');
+        s.style.display = 'none'; 
+    });
+
+    // 2. Actualizamos el índice
+    current = n;
+    const currentSlide = slides[current];
+
+    // 3. Mostramos el nuevo slide con reflow para resetear animaciones CSS
+    currentSlide.style.display = 'flex';
+    currentSlide.offsetHeight; // Forzar reflow
+    currentSlide.classList.add('active');
+
+    // 4. Actualizar interfaz
+    document.getElementById('slide-counter').textContent = 
+        String(current + 1).padStart(2, '0') + ' / ' + String(slides.length).padStart(2, '0');
+    
+    document.getElementById('progress').style.width = ((current + 1) / slides.length * 100) + '%';
+
+    // 5. Programar siguiente
+    scheduleNext();
+}
+
+function nextSlide() {
+    let next = (current >= slides.length - 1) ? 0 : current + 1;
+    showSlide(next);
+}
+
+function scheduleNext() {
+    clearTimeout(timer);
+    const t = TIMING[current];
+    if (t > 0) {
+        timer = setTimeout(nextSlide, t);
+    }
+}
+
+// Iniciar en el slide 0 al cargar
+window.onload = () => showSlide(0);
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { 
+        nextSlide(); 
+    }
+    if (e.key === 'ArrowLeft' && current > 0) { 
+        showSlide(current - 1); 
+    }
+});
+
+// ── TOUCH ──
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) {
+        if (dx < 0) nextSlide();
+        else if (current > 0) showSlide(current - 1);
+    }
+});
+</script>
